@@ -1,0 +1,87 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.row {
+    max-width: 1140px;
+    margin: 0 auto;
+}
+
+html {
+    font-size: 20px;
+    font-family: monospace;
+    font-weight: 10;
+    text-rendering: optimizeLegibility;
+    color:#e8d9a7;
+}
+
+
+/*.grey-frame {*/
+/*    background-color: grey;*/
+/*}*/
+
+/*------------------------------gallery------------------------------*/
+
+.pic-section {
+    width: 100%;
+}
+
+
+.pic-list {
+    list-style: none;
+    width: 100%;
+
+}
+
+
+.pic-list li {
+    display: block;
+    width: 33.3%;
+    float: left;
+    padding: 0;
+
+}
+
+
+.cake-pic {
+    width: 100%;
+    margin: 0;
+    overflow: hidden;
+    background-color: black;
+    position: relative;
+
+}
+
+.cake-pic img {
+    width: 100%;
+    height: auto;
+    transform: scale(1.3);
+    transition: transform 0.5s, opacity 0.5s;
+}
+.cake-pic img:hover {
+    transform: scale(1.03);
+    opacity: 0.5;
+
+}
+
+.cake-pic .btn {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    -ms-transform: translate(-50%, -50%);
+    background-color: #555;
+    color: white;
+    font-size: 16px;
+    padding: 12px 24px;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+    visibility: hidden;
+}
+
+.cake-pic .btn:hover {
+    background-color: black;
+}

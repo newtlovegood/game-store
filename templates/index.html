@@ -1,12 +1,25 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Home</title>
-</head>
-<body>
-{% for game in games %}
-    <p><a href="{% url 'games:detail' game.id %}">{{ game.name }}</a></p>
-{% endfor %}
-</body>
-</html>
+
+{% extends 'base.html' %}
+
+
+
+{% block content %}
+    {% for game in games %}
+        <section id='gallery' class='pic-section'>
+            <ul class='pic-list top'>
+                    <li>
+                        <figure class='cake-pic'>
+                            <img src="{{ STATIC_PREFIX }}resources/img/images/{{ game.name }}.jpg" alt="{{ game.name }}">
+                            <p><a class="btn" href="#">Edit game</a></p>
+                            <p><a class="btn" href="#">Delete game</a></p>
+                            <p><a href="{% url 'games:detail' game.id %}">{{ game.name }}</a></p>
+                        </figure>
+                    </li>
+                </ul>
+        </section>
+
+
+
+
+    {% endfor %}
+{% endblock %}
