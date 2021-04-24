@@ -1,4 +1,5 @@
 {% load static %}
+{% load custom_tags %}
 {% get_static_prefix as STATIC_PREFIX %}
 <!DOCTYPE html>
 <html lang="en">
@@ -11,8 +12,8 @@
 
 
 <body>
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
-      <a class="navbar-brand" href="#">Game Store</a>
+    <nav id="mynav" class="navbar navbar-expand-lg navbar-light">
+      <a class="navbar-brand" href="{% url 'games:home' %}">Game Store</a>
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
@@ -20,7 +21,7 @@
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav mr-auto">
           <li class="nav-item">
-            <a class="nav-link" href="#">Games</a>
+            <a class="nav-link" href="{% url 'games:home' %}">Games</a>
           </li>
 
             <li class="nav-item">
@@ -44,11 +45,11 @@
               </div>
           {% else %}
               <div class="form-inline my-2 my-lg-0">
-                  <a class="nav-link" href="{% url 'login' %}" >Sign In</a>
+                  <a class="nav-link" href="{% url 'login' %}" >Log In</a>
+                  <a class="nav-link" href="{% url 'signup' %}" >Sign In</a>
               </div>
           {% endif %}
 
-      </div>
     </nav>
 
 {#    <form class="form-inline my-2 my-lg-0">#}
@@ -58,9 +59,15 @@
 
 
 
+<div class="jumbotron">
+    {% if request.user|has_group:'managers' %}
+        <a class="btn btn-success" href="{% url 'games:add' %}" >Add game</a>
+    {% endif %}
 
-{% block content %}
-{% endblock %}
+    {% block content %}
+    {% endblock %}
+</div>
+
 
 </body>
 </html>

@@ -1,10 +1,13 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>{{ object.name }}</title>
-</head>
-<body>
+{% extends 'base.html' %}
 
-</body>
-</html>
+{% block content %}
+
+<div class="jumbotron">
+    <img src="{{ STATIC_PREFIX }}resources/img/images/{{ object.name }}.jpg" alt="{{ object.name }}">
+    <p>{{ object.name }}</p>
+    <p>{{ object.price }}</p>
+    <p>{{ object.genre }}</p>
+    <p class="btn btn-large btn-success">BUY</p>
+</div>
+
+{% endblock %}

@@ -1,6 +1,5 @@
-
 {% extends 'base.html' %}
-
+{% load custom_tags %}
 
 
 {% block content %}
@@ -8,12 +7,24 @@
         <section id='gallery' class='pic-section'>
             <ul class='pic-list top'>
                     <li>
-                        <figure class='cake-pic'>
-                            <img src="{{ STATIC_PREFIX }}resources/img/images/{{ game.name }}.jpg" alt="{{ game.name }}">
-                            <p><a class="btn" href="#">Edit game</a></p>
-                            <p><a class="btn" href="#">Delete game</a></p>
-                            <p><a href="{% url 'games:detail' game.id %}">{{ game.name }}</a></p>
-                        </figure>
+                        <div class="single-game-block">
+                            <div class='cake-pic'>
+                                <img src="{{ STATIC_PREFIX }}resources/img/images/{{ game.name }}.jpg" alt="{{ game.name }}">
+                                {% if request.user|has_group:'managers' %}
+                                    <a id="edit" class="btn" href="{% url 'games:edit' game.id %}">Edit game</a>
+                                    <a id="delete" class="btn" href="{% url 'games:delete' game.id %}">Delete game</a>
+                                {% endif %}
+                            </div>
+                            <div class="game-info">
+                                <p class="price">${{ game.price }}</p>
+                                <a class="price" href="#">Buy</a>
+                                <div>
+                                    <p>{{ game.genre }}</p>
+                                    <a href="{% url 'games:detail' game.id %}">{{ game.name }}</a>
+                                </div>
+
+                            </div>
+                        </div>
                     </li>
                 </ul>
         </section>
