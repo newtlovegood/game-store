@@ -6,8 +6,16 @@
     <img src="{{ STATIC_PREFIX }}resources/img/images/{{ object.name }}.jpg" alt="{{ object.name }}">
     <p>{{ object.name }}</p>
     <p>{{ object.price }}</p>
-    <p>{{ object.genre }}</p>
-    <p class="btn btn-large btn-success">BUY</p>
+    {% if object.genre.all %}
+        <p>{% for genre in object.genre.all %}
+            {{ genre }}
+        {% endfor %}</p>
+    {% endif %}
+    <p>{{ object.description }}</p>
+    <a class="btn btn-large btn-success" href="#">BUY</a>
+    {% if user.is_staff %}
+        <a class="btn btn-large btn-info" href="{% url 'games:edit' object.id %}">EDIT</a>
+    {% endif %}
 </div>
 
 {% endblock %}

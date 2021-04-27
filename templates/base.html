@@ -60,9 +60,12 @@
 
 
 <div class="jumbotron">
-    {% if request.user|has_group:'managers' %}
+{#    {% if request.user|has_group:'managers' %}#}
         <a class="btn btn-success" href="{% url 'games:add' %}" >Add game</a>
-    {% endif %}
+{#    {% endif %}#}
+
+    {% block filter %}
+    {% endblock %}
 
     {% block content %}
     {% endblock %}

@@ -2,6 +2,7 @@ from django.urls import reverse_lazy
 from django.views.generic import TemplateView, DetailView, CreateView, UpdateView, DeleteView
 
 from games.models import Game
+from games.forms import GameCreateForm
 
 
 class HomePageView(TemplateView):
@@ -25,8 +26,13 @@ class SingleGameView(DetailView):
 
 class GameCreateView(CreateView):
 
+    template_name = 'games/game_form.html'
+    form_class = GameCreateForm
     model = Game
-    fields = ['name', 'price', 'genre', 'description']
+
+    def form_valid(self, form):
+        print(form.data)
+        return super().form_valid(form)
 
 
 class GameEditView(UpdateView):
@@ -40,3 +46,15 @@ class GameDeleteView(DeleteView):
 
     model = Game
     success_url = reverse_lazy('games:home')
+
+
+class GameFilterView(TemplateView):
+
+    template_name = 'index.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        print(kwargs.get('slug'))
+        context['games'] = Game.objects.all().filter(genre=kwargs.get('slug'))
+        return context
+
