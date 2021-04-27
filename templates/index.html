@@ -3,9 +3,21 @@
 
 {#only displayed on FILTER pages#}
 {% block filter %}
+    <h3>{{ request.resolver_match.kwargs.slug }}</h3>
 {% endblock %}
 
 {% block content %}
+{#        <form class="form-inline my-2 my-lg-0" action="{% url 'games:search' %}" method="get">#}
+{#          <input name="q" class="form-control mr-sm-2" type="search" placeholder="Type a game title" aria-label="Search">#}
+{#          <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>#}
+{#        </form>#}
+
+    <div>
+        <form class="form-inline my-2 my-lg-0" action="{% url 'games:search' %}" method="get">
+            {{ form }}
+        </form>
+    </div>
+
     {% for game in games %}
         <section id='gallery' class='pic-section'>
             <ul class='pic-list top'>
@@ -24,7 +36,7 @@
                                 <div>
                                     {% if game.genre.all %}
                                         <p>{% for genre in game.genre.all %}
-                                            {{ genre }}
+                                            <a href="{% url 'games:filter' genre.name %}">{{ genre }}</a>
                                         {% endfor %}</p>
                                     {% endif %}
                                     <a href="{% url 'games:detail' game.id %}">{{ game.name }}</a>

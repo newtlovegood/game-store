@@ -33,6 +33,7 @@ class Game(models.Model):
     price = models.FloatField()
     description = models.TextField(default='')
     genre = models.ManyToManyField(Genre, blank=True)
+    image = models.ImageField()
 
     def __str__(self):
         return self.name

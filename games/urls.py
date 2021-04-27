@@ -8,7 +8,8 @@ urlpatterns = [
     path('games/add/', views.GameCreateView.as_view(), name='add'),
     path('games/<int:pk>/update/', views.GameEditView.as_view(), name='edit'),
     path('games/<int:pk>/delete/', views.GameDeleteView.as_view(), name='delete'),
-    path('games/filter/<slug:slug>/', views.GameFilterView.as_view(), name='filter'),
+    path('games/filter/genre/<slug:slug>/', views.GameFilterView.as_view(), name='filter'),
+    path('games/search/', views.GameSearchView.as_view(), name='search'),
 ]
 
 
