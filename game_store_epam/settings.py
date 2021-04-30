@@ -40,6 +40,8 @@ INSTALLED_APPS = [
 
     'games.apps.GamesConfig',
     'users.apps.UsersConfig',
+    'comment.apps.CommentConfig',
+    'order.apps.OrderConfig',
 ]
 
 MIDDLEWARE = [
@@ -136,3 +138,11 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # CUSTOM CONSTANTS
 
 LOGIN_REDIRECT_URL = '/'
+
+# MEDIA FILES
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# USER MODEL
+# AUTH_USER_MODEL = 'users.User'

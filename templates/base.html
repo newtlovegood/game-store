@@ -39,8 +39,8 @@
           {% if user.is_authenticated %}
 
               <div class="form-inline my-2 my-lg-0"></div>
-                  <a class="nav-link" href="#" >{{ user.username }}</a>
-                  <a class="nav-link" href="#" >Basket</a>
+                  <a class="nav-link" href="#" >{{ user.first_name }} {{ user.last_name }}</a>
+                  <a class="nav-link" href="#" ><ion-icon name="cart-outline"></ion-icon></a>
                   <a class="nav-link" href="{% url 'logout' %}" >Log Out</a>
               </div>
           {% else %}
@@ -69,5 +69,6 @@
 </div>
 
 
+<script src="https://unpkg.com/ionicons@5.4.0/dist/ionicons.js"></script>
 </body>
 </html>

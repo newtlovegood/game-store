@@ -1,10 +1,11 @@
 from django.urls import reverse_lazy
-from django.shortcuts import get_list_or_404, get_object_or_404
+from django.shortcuts import get_list_or_404
 from django.views.generic import TemplateView, DetailView, CreateView, UpdateView, DeleteView, ListView
-from django.views.generic.edit import FormMixin
+from django.views.generic.edit import ModelFormMixin, FormMixin
 
 from games.models import Game
 from games.forms import GameCreateForm, GameSearchForm
+from comment.forms import CommentForm
 
 
 class HomePageView(FormMixin, TemplateView):
@@ -19,13 +20,35 @@ class HomePageView(FormMixin, TemplateView):
         return context
 
 
-class SingleGameView(DetailView):
+class SingleGameView(ModelFormMixin, DetailView):
 
     model = Game
+
+    form_class = CommentForm
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         return context
+
+    def post(self, request, *args, **kwargs):
+        # if not request.user.is_authenticated:
+        #     return HttpResponseForbidden()
+        # self.object = self.get_object()
+
+        # ADDING GAME AND USER FIELDS TO FORM
+        form = self.get_form()
+        form.instance.game = Game.objects.filter(id=self.kwargs.get('pk'))[0]
+        form.instance.username = request.user
+        # parent fields to fill with Javascript
+        form.save()
+        print(f"AFTER FORM {form.data}")
+        if form.is_valid():
+            return self.form_valid(form)
+        else:
+            return self.form_invalid(form)
+
+    def form_valid(self, form, **kwargs):
+        return super().form_valid(form)
 
 
 class GameCreateView(CreateView):
@@ -35,14 +58,13 @@ class GameCreateView(CreateView):
     model = Game
 
     def form_valid(self, form):
-        print(form.data)
         return super().form_valid(form)
 
 
 class GameEditView(UpdateView):
 
     model = Game
-    fields = ['name', 'price', 'genre', 'description']
+    fields = '__all__'
     template_name_suffix = '_update_form'
 
 
@@ -73,7 +95,7 @@ class GameSearchView(ListView):
     def get_queryset(self):
         # to GET VALUE from search form
         query = self.request.GET.get('q')
-        games = get_object_or_404(Game.objects.filter(name__icontains=query))
+        games = get_list_or_404(Game.objects.filter(name__icontains=query))
         return games
 
 

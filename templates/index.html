@@ -24,7 +24,7 @@
                     <li>
                         <div class="single-game-block">
                             <div class='cake-pic'>
-                                <img src="{{ STATIC_PREFIX }}resources/img/images/{{ game.name }}.jpg" alt="{{ game.name }}">
+                                <img src="/media/images/games/{{ game.name.lower }}.jpg" alt="{{ game.name }}">
 {#                                {% if request.user|has_group:'managers' %}#}
                                     <a id="edit" class="btn" href="{% url 'games:edit' game.id %}">Edit game</a>
                                     <a id="delete" class="btn" href="{% url 'games:delete' game.id %}">Delete game</a>
@@ -47,7 +47,6 @@
                     </li>
                 </ul>
         </section>
-
 
 
 

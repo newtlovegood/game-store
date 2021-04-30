@@ -1,0 +1,26 @@
+<div class="form">
+    <form method="post" action="">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <input class="btn-danger" type="reset" name="cancel" value="Cancel">
+        <input class="btn-success" type="submit" name="submit" value="Submit comment">
+    </form>
+
+</div>
+
+
+<div class="jumbotron">
+    {% for comment in object.comment_set.all %}
+        <p>{{ comment.content }}</p>
+        <p>by <a href="#">{{ comment.username }}</a> at {{ comment.timestamp }}</p>
+        <a href="#">Reply</a>
+        <a href="#">Edit</a>
+        <a href="#">Delete</a>
+            <form method="post" action="">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <input class="btn-danger" type="reset" name="cancel" value="Cancel">
+                <input class="btn-success" type="submit" name="submit" value="Submit comment">
+            </form>
+    {% endfor %}
+</div>

@@ -3,7 +3,7 @@
 {% block content %}
 
 <div class="jumbotron">
-    <img src="{{ STATIC_PREFIX }}resources/img/images/{{ object.name }}.jpg" alt="{{ object.name }}">
+    <img src="/media/images/games/{{ object.name.lower }}.jpg" alt="{{ object.name }}">
     <p>{{ object.name }}</p>
     <p>{{ object.price }}</p>
     {% if object.genre.all %}
@@ -17,5 +17,13 @@
         <a class="btn btn-large btn-info" href="{% url 'games:edit' object.id %}">EDIT</a>
     {% endif %}
 </div>
+
+
+
+{# Comment section #}
+<a href="#">Comment</a>
+{% include 'comment/_comments.html' %}
+
+
 
 {% endblock %}
