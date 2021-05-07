@@ -9,4 +9,5 @@
     </ul>
     <p>{{ cur_order.date }}</p>
     <p>{{ cur_order.total }}</p>
+    <p><a class="btn btn-success" href="{% url 'order:checkout' %}">CHECKOUT</a></p>
 {% endblock %}

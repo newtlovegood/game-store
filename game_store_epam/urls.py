@@ -18,6 +18,8 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 
+from . import views
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -25,6 +27,7 @@ urlpatterns = [
     path('', include('games.urls')),
     path('accounts/', include('users.urls')),
     path('orders/', include('order.urls')),
+    path('thanks/', views.ThanksView.as_view(), name='thanks'),
 
     # below RENDERS media images on local machine
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

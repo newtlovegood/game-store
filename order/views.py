@@ -1,12 +1,11 @@
-from django.views.generic import ListView, DetailView
+from django.views.generic import ListView, DetailView, FormView
 from django.shortcuts import get_list_or_404, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from django.contrib import messages
-from django.db.models import Sum
-from django.db.models.signals import post_save
 
 from order.models import Order, OrderItem
+from order.forms import OrderCheckoutForm
 from games.models import Game
 
 
@@ -45,6 +44,32 @@ class OrderDetailView(DetailView):
         context = super().get_context_data(**kwargs)
         context['orders_filtered'] = OrderItem.objects.all()
         return context
+
+
+class OrderCheckoutView(FormView):
+
+    template_name = 'order/order_checkout.html'
+    form_class = OrderCheckoutForm
+    success_url = '/thanks/'
+
+    def get_initial(self):
+        initial = super(OrderCheckoutView, self).get_initial()
+        initial.update({'first_name': self.request.user.first_name,
+                        'last_name': self.request.user.last_name,
+                        'email': self.request.user.email})
+        return initial
+
+    def get_context_data(self, **kwargs):
+        context = super(OrderCheckoutView, self).get_context_data()
+        context['messages'] = messages.info(self.request, 'Order is confirmed by GameStore')
+        return context
+
+    def form_valid(self, form):
+        order = Order.objects.filter(customer=self.request.user, ordered=False)[0]
+        order.ordered = True
+        order.save()
+        print('rterterteeter')
+        return super().form_valid(form)
 
 
 @login_required

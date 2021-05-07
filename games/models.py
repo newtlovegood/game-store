@@ -1,8 +1,5 @@
 from django.db import models
 from django.urls import reverse
-from django.conf import settings
-
-from django.contrib.postgres.fields import ArrayField
 
 
 class Genre(models.Model):
