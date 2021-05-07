@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <p>{{ cur_order.customer }}</p>
+    <ul>
+    {% for item in cur_order.items.all %}
+        <li>{{ item}}<a class="btn btn-danger" href="{% url 'order:remove-from-cart' item.item.id %}">Remove from cart</a></li>
+    {% endfor %}
+    </ul>
+    <p>{{ cur_order.date }}</p>
+    <p>{{ cur_order.total }}</p>
+{% endblock %}

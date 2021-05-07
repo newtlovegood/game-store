@@ -1,5 +1,5 @@
 from django.urls import reverse_lazy
-from django.shortcuts import get_list_or_404
+from django.shortcuts import get_list_or_404, get_object_or_404
 from django.views.generic import TemplateView, DetailView, CreateView, UpdateView, DeleteView, ListView
 from django.views.generic.edit import ModelFormMixin, FormMixin
 
@@ -41,7 +41,6 @@ class SingleGameView(ModelFormMixin, DetailView):
         form.instance.username = request.user
         # parent fields to fill with Javascript
         form.save()
-        print(f"AFTER FORM {form.data}")
         if form.is_valid():
             return self.form_valid(form)
         else:
@@ -97,6 +96,7 @@ class GameSearchView(ListView):
         query = self.request.GET.get('q')
         games = get_list_or_404(Game.objects.filter(name__icontains=query))
         return games
+
 
 
 

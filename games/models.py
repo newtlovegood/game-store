@@ -44,18 +44,15 @@ class Game(models.Model):
         # using this mostly for redirects in CBVs
         return reverse('games:detail', kwargs={'pk': self.pk})
 
-#
-# class Comment(models.Model):
-#
-#     username = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.DO_NOTHING)
-#     game = models.ForeignKey(Game, on_delete=models.CASCADE, null=True)
-#     timestamp = models.DateTimeField(auto_now_add=True)
-#     comment = models.TextField()
-#
-#     def __str__(self):
-#         return f"{self.username}'s comment"
-#
-#
+    def get_add_to_cart_url(self) :
+        return reverse("core:add-to-cart", kwargs={
+            "pk": self.pk
+        })
+
+    def get_remove_from_cart_url(self) :
+        return reverse("core:remove-from-cart", kwargs={
+            "pk": self.pk
+        })
 
 
 

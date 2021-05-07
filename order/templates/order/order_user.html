@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+    {% for order in user_filtered %}
+        <p><a href="{% url 'order:order-detail' order.pk %}">{{ order }}</a></p>
+    {% endfor %}
+
+{% endblock %}

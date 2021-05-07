@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <p>{{ object.customer }}</p>
+    <ul>
+    {% for item in object.items.all %}
+        <li>{{ item }}</li>
+    {% endfor %}
+    </ul>
+    <p>{{ object.date }}</p>
+    <p>{{ object.total }}</p>
+{% endblock %}

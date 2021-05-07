@@ -1,7 +1,11 @@
+{% load crispy_forms_filters %}
+{% load  static %}
+{% load crispy_forms_tags %}
+
 <div class="form">
     <form method="post" action="">
         {% csrf_token %}
-        {{ form.as_p }}
+        {{ form|crispy }}
         <input class="btn-danger" type="reset" name="cancel" value="Cancel">
         <input class="btn-success" type="submit" name="submit" value="Submit comment">
     </form>
@@ -9,18 +13,43 @@
 </div>
 
 
-<div class="jumbotron">
-    {% for comment in object.comment_set.all %}
-        <p>{{ comment.content }}</p>
-        <p>by <a href="#">{{ comment.username }}</a> at {{ comment.timestamp }}</p>
-        <a href="#">Reply</a>
-        <a href="#">Edit</a>
-        <a href="#">Delete</a>
-            <form method="post" action="">
-                {% csrf_token %}
-                {{ form.as_p }}
-                <input class="btn-danger" type="reset" name="cancel" value="Cancel">
-                <input class="btn-success" type="submit" name="submit" value="Submit comment">
-            </form>
-    {% endfor %}
+{% for comment in object.comment_set.all %}
+
+<div class="container mt-5">
+    <div class="d-flex row">
+        <div class="col-md-8">
+            <div class="d-flex flex-column comment-section">
+                <div class="bg-white p-2">
+                    <div class="d-flex flex-row user-info">
+                        <img class="rounded-circle" src="/media/images/profiles/default.jpg" width="40">
+                        <div class="d-flex flex-column justify-content-start ml-2">
+                            <span class="d-block font-weight-bold name">{{ comment.username }}</span>
+                            <span class="date text-black-50">{{ comment.timestamp }}</span>
+                        </div>
+                    </div>
+                    <div class="mt-2">
+                        <p class="comment-text">{{ comment.content }}</p>
+                    </div>
+                </div>
+                <div class="bg-white">
+                    <div class="d-flex flex-row fs-12">
+                        <div class="like p-2 cursor"><i class="fa fa-thumbs-o-up"></i><span class="ml-1">Like</span></div>
+                        <div class="like p-2 cursor"><i class="fa fa-commenting-o"></i><span class="ml-1">Reply</span></div>
+                    </div>
+                </div>
+                <div class="bg-light p-2">
+                    <div class="d-flex flex-row align-items-start">
+                        <img class="rounded-circle" src="https://i.imgur.com/RpzrMR2.jpg" width="40">
+                    <form method="post" action="">
+                        {% csrf_token %}
+                        {{ form|crispy }}
+                        <input class="btn-danger" type="reset" name="cancel" value="Cancel">
+                        <input class="btn-success" type="submit" name="submit" value="Submit comment">
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+
+{% endfor %}

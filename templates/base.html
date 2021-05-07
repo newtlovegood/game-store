@@ -1,11 +1,16 @@
 {% load static %}
 {% load custom_tags %}
+{% load crispy_forms_tags %}
 {% get_static_prefix as STATIC_PREFIX %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+{#    bootstrap #}
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+{#    Jquery #}
     <link rel="stylesheet" type="text/css" href="{% static 'games/main.css' %}">
     <title>Base</title>
 </head>
@@ -40,35 +45,142 @@
 
               <div class="form-inline my-2 my-lg-0"></div>
                   <a class="nav-link" href="#" >{{ user.first_name }} {{ user.last_name }}</a>
-                  <a class="nav-link" href="#" ><ion-icon name="cart-outline"></ion-icon></a>
+                  <a class="nav-link" href="{% url 'order:order-current' user.id %}" ><ion-icon name="cart-outline"></ion-icon></a>
                   <a class="nav-link" href="{% url 'logout' %}" >Log Out</a>
               </div>
           {% else %}
               <div class="form-inline my-2 my-lg-0">
-                  <a class="nav-link" href="{% url 'login' %}" >Log In</a>
-                  <a class="nav-link" href="{% url 'signup' %}" >Sign In</a>
+                  <button type="button" class="btn" data-toggle="modal" data-target="#loginModal"
+                  onclick="getElementById('login-link').click()">LOGIN</button>
+                  <button type="button" class="btn btn-dark ml-2" data-toggle="modal" data-target="#loginModal"
+                  onclick="getElementById('signup-link').click()">SIGN UP</button>
               </div>
           {% endif %}
 
     </nav>
 
-
-
-
-
-<div class="jumbotron">
-{#    {% if request.user|has_group:'managers' %}#}
+{#<div class="jumbotron">#}
+    {% if request.user|has_group:'managers' %}
         <a class="btn btn-success" href="{% url 'games:add' %}" >Add game</a>
-{#    {% endif %}#}
+    {% endif %}
 
     {% block filter %}
     {% endblock %}
 
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alett-{{ message.tags }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+
     {% block content %}
     {% endblock %}
+
+    <!--Modal: Login / Register Form-->
+<div class="modal fade" id="loginModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog cascading-modal" role="document">
+    <!--Content-->
+    <div class="modal-content">
+
+      <!--Modal cascading tabs-->
+      <div class="modal-c-tabs">
+
+        <!-- Nav tabs -->
+        <ul class="nav nav-tabs md-tabs tabs-2 light-blue darken-3" role="tablist">
+          <li class="nav-item">
+            <a id="login-link" class="nav-link active" data-toggle="tab" href="#panel7" role="tab"><i class="fas fa-user mr-1"></i>
+              Login</a>
+          </li>
+          <li class="nav-item">
+            <a id="signup-link" class="nav-link" data-toggle="tab" href="#panel8" role="tab"><i class="fas fa-user-plus mr-1"></i>
+              Sign Up</a>
+          </li>
+        </ul>
+
+        <!-- Tab panels -->
+        <div class="tab-content">
+          <!--Panel 7-->
+          <div class="tab-pane fade in show active" id="panel7" role="tabpanel">
+
+            <!--Body-->
+            <div class="modal-body mb-1">
+                    <form method="post" action="{% url 'login' %}">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <input type="text" name="username" class="form-control" placeholder="Username">
+                        </div>
+                        <div class="form-group">
+                            <input type="password" name="password" class="form-control" placeholder="Password">
+                        </div>
+                        <input type="submit" class="btn btn-success" value="Login">
+                    </form>
+            </div>
+            <!--Footer-->
+            <div class="modal-footer">
+              <div class="options text-center text-md-right mt-1">
+                <p>Not a member? <a href="{% url 'signup' %}" class="blue-text">Sign Up</a></p>
+                <p>Forgot <a href="#" class="blue-text">Password?</a></p>
+              </div>
+              <button type="button" class="btn btn-outline-info waves-effect ml-auto" data-dismiss="modal">Close</button>
+            </div>
+
+          </div>
+          <!--/.Panel 7-->
+
+          <!--Panel 8-->
+          <div class="tab-pane fade" id="panel8" role="tabpanel">
+
+            <!--Body-->
+            <div class="modal-body">
+                <form method="post" action="{% url 'signup' %}">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <input type="text" name="username" class="form-control" placeholder="User Name">
+                        </div>
+                        <div class="form-group">
+                            <input type="text" name="firstname" class="form-control" placeholder="First Name">
+                        </div>
+                        <div class="form-group">
+                            <input type="text" name="lastname" class="form-control" placeholder="Last Name">
+                        </div>
+                        <div class="form-group">
+                            <input type="email" name="email" class="form-control" placeholder="Email">
+                        </div>
+                        <div class="form-group">
+                            <input type="password" name="password1" class="form-control" placeholder="Password">
+                        </div>
+                        <div class="form-group">
+                            <input type="password" name="password2" class="form-control" placeholder="Repeat Password">
+                        </div>
+                        <div class="modal-footer">
+                            <input type="submit" class="btn btn-success" value="Sign Up">
+                        </div>
+                </form>
+            </div>
+            <!--Footer-->
+            <div class="modal-footer">
+              <div class="options text-right">
+                <p class="pt-1">Already have an account? <a href="{% url 'login' %}" class="blue-text">Log In</a></p>
+              </div>
+              <button type="button" class="btn btn-outline-info waves-effect ml-auto" data-dismiss="modal">Close</button>
+            </div>
+          </div>
+          <!--/.Panel 8-->
+        </div>
+
+      </div>
+    </div>
+    <!--/.Content-->
+  </div>
 </div>
-
-
+{# icons #}
 <script src="https://unpkg.com/ionicons@5.4.0/dist/ionicons.js"></script>
+{# bootstrap js #}
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 </body>
 </html>

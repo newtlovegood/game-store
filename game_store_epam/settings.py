@@ -42,6 +42,8 @@ INSTALLED_APPS = [
     'users.apps.UsersConfig',
     'comment.apps.CommentConfig',
     'order.apps.OrderConfig',
+
+    'crispy_forms',
 ]
 
 MIDDLEWARE = [
@@ -144,5 +146,5 @@ LOGIN_REDIRECT_URL = '/'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-# USER MODEL
-# AUTH_USER_MODEL = 'users.User'
+# UI forms
+# CRISPY_TEMPLATE_PACK = 'bootstrap4'

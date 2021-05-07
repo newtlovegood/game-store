@@ -14,5 +14,7 @@ class GameCreateForm(forms.ModelForm):
 
 class GameSearchForm(forms.Form):
 
+    prefix = 'search'
+
     q = forms.CharField(max_length=100, label='Search')
 

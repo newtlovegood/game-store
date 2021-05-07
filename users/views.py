@@ -7,7 +7,6 @@ from users.forms import UserCreateForm
 from django.contrib.auth.forms import UserCreationForm
 
 
-
 class SignUp(CreateView):
     form_class = UserCreateForm
     success_url = reverse_lazy('login')

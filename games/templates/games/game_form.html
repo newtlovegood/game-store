@@ -1,5 +1,12 @@
-<form method="post" action="">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <input type="submit" value="Add">
-</form>
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="jumbotron">
+        <form method="post" action="">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <input class="btn btn-lg btn-success" type="submit" value="Add">
+        </form>
+    </div>
+
+{% endblock %}

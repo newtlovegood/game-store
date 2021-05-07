@@ -1,5 +1,13 @@
-<form method="post" action="">
-    {% csrf_token %}
-    {{ form.as_p }}
+{% extends 'base.html' %}
+
+
+{% block content %}
+    <div class="jumbotron">
+        <form method="post" action="">
+            {% csrf_token %}
+            {{ form.as_p }}
     <input type="submit" value="Save">
-</form>
+        </form>
+    </div>
+
+{% endblock %}

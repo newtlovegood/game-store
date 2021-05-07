@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+from django.db.models import Sum
 
 from games.models import Game
 
@@ -11,8 +12,16 @@ class Order(models.Model):
     ordered = models.BooleanField(default=False)
     date = models.DateTimeField(auto_now_add=True)
 
+    def increase_total(self, order_item):
+        self.total += order_item.price
+        self.save()
+
+    def reduce_total(self, order_item):
+        self.total -= order_item.price
+        self.save()
+
     def __str__(self):
-        return f"{self.customer.name}'s order"
+        return f"{self.customer.username}'s order"
 
 
 class OrderItem(models.Model):
@@ -22,4 +31,4 @@ class OrderItem(models.Model):
     quantity = models.IntegerField(default=1)
 
     def __str__(self):
-        return f"{self.quantity} of {self.item.name}"
+        return f"{self.quantity} piece(s) of {self.item.name}"

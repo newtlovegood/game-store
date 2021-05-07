@@ -1,20 +1,19 @@
 {% extends 'base.html' %}
 {% load custom_tags %}
+{% load crispy_forms_tags %}
 
 {#only displayed on FILTER pages#}
 {% block filter %}
-    <h3>{{ request.resolver_match.kwargs.slug }}</h3>
+    <h3>{{ request.resolver_match.kwargs.slug.capitalize }}</h3>
 {% endblock %}
 
+
+
 {% block content %}
-{#        <form class="form-inline my-2 my-lg-0" action="{% url 'games:search' %}" method="get">#}
-{#          <input name="q" class="form-control mr-sm-2" type="search" placeholder="Type a game title" aria-label="Search">#}
-{#          <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>#}
-{#        </form>#}
 
     <div>
         <form class="form-inline my-2 my-lg-0" action="{% url 'games:search' %}" method="get">
-            {{ form }}
+            {{ form|crispy }}
         </form>
     </div>
 
@@ -25,14 +24,14 @@
                         <div class="single-game-block">
                             <div class='cake-pic'>
                                 <img src="/media/images/games/{{ game.name.lower }}.jpg" alt="{{ game.name }}">
-{#                                {% if request.user|has_group:'managers' %}#}
+                                {% if request.user|has_group:'managers' %}
                                     <a id="edit" class="btn" href="{% url 'games:edit' game.id %}">Edit game</a>
                                     <a id="delete" class="btn" href="{% url 'games:delete' game.id %}">Delete game</a>
-{#                                {% endif %}#}
+                                {% endif %}
                             </div>
                             <div class="game-info">
                                 <p class="price">${{ game.price }}</p>
-                                <a class="price" href="#">Buy</a>
+                                <a class="price" href="{% url 'order:add-to-cart' game.id %}">Buy</a>
                                 <div>
                                     {% if game.genre.all %}
                                         <p>{% for genre in game.genre.all %}
