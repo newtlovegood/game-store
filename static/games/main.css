@@ -25,15 +25,18 @@ body {
     background-color: black;
 }
 
-/*.grey-frame {*/
-/*    background-color: grey;*/
-/*}*/
-
+ion-icon {
+    font-size: 35px;
+    padding: 0;
+    margin: 0;
+}
 /*------------------------------gallery------------------------------*/
 
 .main-frame {
     height: 100%;
     background-color: #383737;
+    color: wheat;
+    border-radius: 10px;
 }
 
 .game-gallery {
@@ -45,6 +48,7 @@ body {
     background-color: grey;
     color: wheat;
     height: 200px;
+    border-radius: 10px;
 }
 
 .game-info a {
@@ -82,6 +86,7 @@ body {
 
 .single-game-block {
     height: 600px;
+    border-radius: 10px;
 }
 
 .cake-pic {
@@ -90,6 +95,7 @@ body {
     overflow: hidden;
     background-color: black;
     position: relative;
+    border-radius: 10px;
 
 }
 
@@ -145,6 +151,7 @@ body {
     width: auto;
     float: left;
     margin: 0;
+    font-size: larger;
     /*text-align: center;*/
 }
 
@@ -172,4 +179,16 @@ body {
 /* Handle on hover */
 ::-webkit-scrollbar-thumb:hover {
   background: #555;
+}
+
+
+/*----------------------------game detail----------------------*/
+
+.detail-container {
+    color: wheat;
+}
+
+.detail-container img {
+    display: block;
+    margin: auto;
 }

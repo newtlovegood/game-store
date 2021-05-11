@@ -61,7 +61,7 @@ class OrderCheckoutView(FormView):
                         'email': self.request.user.email})
         return initial
 
-    def get_context_data(self, **kwargs):
+    def get_confirm_message(self, **kwargs):
         context = super(OrderCheckoutView, self).get_context_data()
         context['messages'] = messages.info(self.request, 'Order is confirmed by GameStore')
         return context
@@ -73,6 +73,7 @@ class OrderCheckoutView(FormView):
             order = Order.objects.filter(customer=self.request.user, ordered=False)[0]
         order.ordered = True
         order.save()
+        self.get_confirm_message()
         return super().form_valid(form)
 
 

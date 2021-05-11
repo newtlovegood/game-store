@@ -2,12 +2,12 @@
 {% load  static %}
 {% load crispy_forms_tags %}
 
-<div class="form">
+<div class="form-control">
     <form method="post" action="">
         {% csrf_token %}
         {{ form|crispy }}
-        <input class="btn-danger" type="reset" name="cancel" value="Cancel">
-        <input class="btn-success" type="submit" name="submit" value="Submit comment">
+        <input class="btn btn-danger" type="reset" name="cancel" value="Cancel">
+        <input class="btn btn-success" type="submit" name="submit" value="Submit comment">
     </form>
 
 </div>

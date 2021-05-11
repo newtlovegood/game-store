@@ -3,10 +3,10 @@
 
 {% block content %}
 
-<div class="jumbotron">
-    <img src="{{ object.image.url }}" alt="{{ object.name }}">
-    <p>{{ object.name }}</p>
-    <p>{{ object.price }}</p>
+<div class="detail-container">
+    <img class="text-center" src="{{ object.image.url }}" alt="{{ object.name }}">
+    <p class="game-name"><b>{{ object.name }}</b></p>
+    <p>${{ object.price }}</p>
     {% if object.genre.all %}
         <p>{% for genre in object.genre.all %}
             {{ genre }}
@@ -22,14 +22,15 @@
         <a class="btn btn-large btn-info" href="{% url 'games:edit' object.id %}">EDIT</a>
         <a class="btn btn-large btn-danger" href="{% url 'games:delete' object.id %}">DELETE</a>
     {% endif %}
-</div>
 
 
 
 {# Comment section #}
-<a href="#">Comment</a>
+<h3>Comment</h3>
 {% include 'comment/_comments.html' %}
 
 
 
 {% endblock %}
+
+</div>
