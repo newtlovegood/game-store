@@ -1,7 +1,8 @@
 from django.urls import reverse_lazy
-from django.shortcuts import get_list_or_404, get_object_or_404
+from django.shortcuts import get_list_or_404
 from django.views.generic import TemplateView, DetailView, CreateView, UpdateView, DeleteView, ListView
 from django.views.generic.edit import ModelFormMixin, FormMixin
+from django.contrib.auth.mixins import UserPassesTestMixin
 
 from games.models import Game
 from games.forms import GameCreateForm, GameSearchForm
@@ -16,7 +17,7 @@ class HomePageView(FormMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['games'] = Game.objects.all()[:5]
+        context['games'] = Game.objects.all()
         return context
 
 
@@ -50,27 +51,54 @@ class SingleGameView(ModelFormMixin, DetailView):
         return super().form_valid(form)
 
 
-class GameCreateView(CreateView):
+class GameCreateView(UserPassesTestMixin, CreateView):
 
     template_name = 'games/game_form.html'
     form_class = GameCreateForm
     model = Game
 
+    def post(self, request, *args, **kwargs):
+        form = self.get_form(self.form_class)
+        print(form)
+        if form.is_valid():
+            form.save()
+            return self.form_valid(form)
+        else:
+            return self.form_invalid(form)
+
     def form_valid(self, form):
         return super().form_valid(form)
 
+    def test_func(self):
+        return self.request.user.groups.filter(name='managers').exists()
 
-class GameEditView(UpdateView):
+
+class GameEditView(UserPassesTestMixin, UpdateView):
 
     model = Game
     fields = '__all__'
     template_name_suffix = '_update_form'
 
+    # def post(self, request, *args, **kwargs):
+    #     form = self.get_form(self.form_class)
+    #     print(request.FILES)
+    #     if form.is_valid():
+    #         form.save()
+    #         return self.form_valid(form)
+    #     else:
+    #         return self.form_invalid(form)
 
-class GameDeleteView(DeleteView):
+    def test_func(self):
+        return self.request.user.groups.filter(name='managers').exists()
+
+
+class GameDeleteView(UserPassesTestMixin, DeleteView):
 
     model = Game
     success_url = reverse_lazy('games:home')
+
+    def test_func(self):
+        return self.request.user.groups.filter(name='managers').exists()
 
 
 class GameFilterView(TemplateView):
@@ -94,9 +122,9 @@ class GameSearchView(ListView):
     def get_queryset(self):
         # to GET VALUE from search form
         query = self.request.GET.get('q')
+        print(self.request.GET)
         games = get_list_or_404(Game.objects.filter(name__icontains=query))
         return games
-
 
 
 

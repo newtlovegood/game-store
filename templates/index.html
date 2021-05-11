@@ -10,44 +10,69 @@
 
 
 {% block content %}
+    <div class="main-frame">
+        <div class="pt-2">
+            {% if request.user|has_group:'managers' %}
+                <a class="btn btn-success" href="{% url 'games:add' %}" >Add game</a>
+            {% endif %}
 
-    <div>
-        <form class="form-inline my-2 my-lg-0" action="{% url 'games:search' %}" method="get">
-            {{ form|crispy }}
-        </form>
-    </div>
+            <button class="btn ">Genre</button>
 
-    {% for game in games %}
-        <section id='gallery' class='pic-section'>
-            <ul class='pic-list top'>
-                    <li>
-                        <div class="single-game-block">
-                            <div class='cake-pic'>
-                                <img src="/media/images/games/{{ game.name.lower }}.jpg" alt="{{ game.name }}">
-                                {% if request.user|has_group:'managers' %}
-                                    <a id="edit" class="btn" href="{% url 'games:edit' game.id %}">Edit game</a>
-                                    <a id="delete" class="btn" href="{% url 'games:delete' game.id %}">Delete game</a>
-                                {% endif %}
-                            </div>
-                            <div class="game-info">
-                                <p class="price">${{ game.price }}</p>
-                                <a class="price" href="{% url 'order:add-to-cart' game.id %}">Buy</a>
-                                <div>
-                                    {% if game.genre.all %}
-                                        <p>{% for genre in game.genre.all %}
-                                            <a href="{% url 'games:filter' genre.name %}">{{ genre }}</a>
-                                        {% endfor %}</p>
+            <form class="search-box form-inline my-lg-0" action="{% url 'games:search' %}" method="get">
+                {{ form|crispy }}
+            </form>
+        </div>
+
+
+        <div class="game-gallery mt-2">
+
+                <section id='gallery' class='pic-section'>
+                    <ul class='pic-list top'>
+                        {% for game in games %}
+                            <li>
+                            <div class="single-game-block">
+                                <div class='cake-pic'>
+                                    <img src="{{ game.image.url }}" alt="{{ game.name }}">
+                                    {% if request.user|has_group:'managers' %}
+                                        <a id="edit" class="btn" href="{% url 'games:edit' game.id %}">Edit game</a>
+                                        <a id="delete" class="btn" href="{% url 'games:delete' game.id %}">Delete game</a>
                                     {% endif %}
-                                    <a href="{% url 'games:detail' game.id %}">{{ game.name }}</a>
                                 </div>
 
+                                <div class="game-info">
+                                    <div class="purchase-info">
+                                        <p class="price">${{ game.price }}</p>
+                                            {% if not game.in_stock %}
+                                                <button disabled class="btn btn-dark float-right" href="{% url 'order:add-to-cart' game.id %}">Buy</button>
+                                                <p class="text-sm-center">Out of Stock</p>
+                                            {% else %}
+                                                <button class="btn btn-success float-right" ><a href="{% url 'order:add-to-cart' game.id %}">Buy</a></button>
+                                                <p class="text-sm-center">Available</p>
+                                            {% endif %}
+                                    </div>
+
+                                    <div class="game-data">
+                                        <div class="game-genre">
+                                            {% if game.genre.all %}
+                                                <p>{% for genre in game.genre.all %}
+                                                    <a href="{% url 'games:filter' genre.name %}">{{ genre }}</a>
+                                                {% endfor %}</p>
+                                            {% endif %}
+                                        </div>
+
+                                        <div class="game-name">
+                                            <a href="{% url 'games:detail' game.id %}"><b>{{ game.name }}</b></a>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                    </li>
-                </ul>
-        </section>
 
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </section>
+        </div>
 
+    </div>
 
-    {% endfor %}
 {% endblock %}

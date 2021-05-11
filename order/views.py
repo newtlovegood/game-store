@@ -27,7 +27,7 @@ class UserCurrentOrderView(ListView):
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['cur_order'] = get_object_or_404(Order.objects.filter(customer_id=self.kwargs.get('id')).filter(ordered=False))
+        context['cur_order'] = get_object_or_404(Order.objects.filter(ordered=False))
         return context
 
 
@@ -54,6 +54,8 @@ class OrderCheckoutView(FormView):
 
     def get_initial(self):
         initial = super(OrderCheckoutView, self).get_initial()
+        if self.request.user.is_anonymous:
+            return initial
         initial.update({'first_name': self.request.user.first_name,
                         'last_name': self.request.user.last_name,
                         'email': self.request.user.email})
@@ -65,22 +67,31 @@ class OrderCheckoutView(FormView):
         return context
 
     def form_valid(self, form):
-        order = Order.objects.filter(customer=self.request.user, ordered=False)[0]
+        if self.request.user.is_anonymous:
+            order = Order.objects.filter(ordered=False)[0]
+        else:
+            order = Order.objects.filter(customer=self.request.user, ordered=False)[0]
         order.ordered = True
         order.save()
-        print('rterterteeter')
         return super().form_valid(form)
 
 
-@login_required
 def add_to_cart(request, pk):
     item = get_object_or_404(Game, pk=pk)
-    order_item, created = OrderItem.objects.get_or_create(
-        item=item,
-        user=request.user,
-        ordered=False
-    )
-    order_qs = Order.objects.filter(customer=request.user, ordered=False)
+    if request.user.is_anonymous:
+        order_item = OrderItem.objects.create(
+            item=item,
+            ordered=False
+        )
+        order_qs = Order.objects.filter(ordered=False)
+
+    else:
+        order_item, created = OrderItem.objects.get_or_create(
+            item=item,
+            user=request.user,
+            ordered=False
+        )
+        order_qs = Order.objects.filter(customer=request.user, ordered=False)
 
     if order_qs.exists():
         order = order_qs[0]
@@ -105,11 +116,10 @@ def add_to_cart(request, pk):
         return redirect("games:detail", pk=pk)
 
 
-@login_required
 def remove_from_cart(request, pk):
     # takes an item(game)
     item = get_object_or_404(Game, pk=pk)
-    # takes all orders of user which are not ordered
+    # takes all order of user which are not ordered
     order_qs = Order.objects.filter(
         customer=request.user,
         ordered=False

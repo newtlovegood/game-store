@@ -25,8 +25,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('games/', include('games.urls')),
     path('', include('games.urls')),
-    path('accounts/', include('users.urls')),
-    path('orders/', include('order.urls')),
+    path('accounts/', include('allauth.urls')),
+    path('order/', include('order.urls')),
     path('thanks/', views.ThanksView.as_view(), name='thanks'),
 
     # below RENDERS media images on local machine

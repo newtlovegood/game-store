@@ -4,6 +4,10 @@
     box-sizing: border-box;
 }
 
+/*a {*/
+/*    text-decoration: none;*/
+/*}*/
+
 .row {
     max-width: 1140px;
     margin: 0 auto;
@@ -17,13 +21,44 @@ html {
     color:#e8d9a7;
 }
 
-
+body {
+    background-color: black;
+}
 
 /*.grey-frame {*/
 /*    background-color: grey;*/
 /*}*/
 
 /*------------------------------gallery------------------------------*/
+
+.main-frame {
+    height: 100%;
+    background-color: #383737;
+}
+
+.game-gallery {
+    height: 100vh;
+    overflow: auto;
+}
+
+.game-info {
+    background-color: grey;
+    color: wheat;
+    height: 200px;
+}
+
+.game-info a {
+    text-decoration: none;
+    color: wheat;
+}
+
+.purchase-info {
+    padding: 1vh;
+}
+
+.game-name {
+    font-size: larger;
+}
 
 .pic-section {
     width: 100%;
@@ -39,12 +74,15 @@ html {
 
 .pic-list li {
     display: block;
+    padding: 1vh 1vh;
     width: 33.3%;
     float: left;
-    padding: 0;
 
 }
 
+.single-game-block {
+    height: 600px;
+}
 
 .cake-pic {
     width: 100%;
@@ -104,9 +142,34 @@ html {
 
 
 .price {
-    width: 50%;
-    height: 100%;
+    width: auto;
     float: left;
     margin: 0;
     /*text-align: center;*/
+}
+
+.search-box {
+    float:right;
+}
+
+/*----------------------------SCROLLBAR----------------------*/
+
+/* width */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+    visibility: hidden;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #888;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
 }

@@ -4,7 +4,7 @@
 {% block content %}
 
 <div class="jumbotron">
-    <img src="/media/images/games/{{ object.name.lower }}.jpg" alt="{{ object.name }}">
+    <img src="{{ object.image.url }}" alt="{{ object.name }}">
     <p>{{ object.name }}</p>
     <p>{{ object.price }}</p>
     {% if object.genre.all %}
@@ -16,10 +16,11 @@
     {% if user.is_authenticated %}
         <a class="btn btn-large btn-success" href="{% url 'order:add-to-cart' object.pk %}">BUY</a>
     {% else %}
-        <a class="btn btn-large btn-success" href="{% url 'login' %}">BUY</a>
+        <a class="btn btn-large btn-success" href="{% url 'account_login' %}">BUY</a>
     {% endif %}
     {% if request.user|has_group:'managers' %}
         <a class="btn btn-large btn-info" href="{% url 'games:edit' object.id %}">EDIT</a>
+        <a class="btn btn-large btn-danger" href="{% url 'games:delete' object.id %}">DELETE</a>
     {% endif %}
 </div>
 

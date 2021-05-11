@@ -1,5 +1,6 @@
 from django.db import models
 from django.urls import reverse
+from django.core.validators import MaxValueValidator
 
 
 class Genre(models.Model):
@@ -33,9 +34,11 @@ class Game(models.Model):
     description = models.TextField(default='')
     genre = models.ManyToManyField(Genre, blank=True)
     image = models.ImageField(upload_to='images/games', default='images/games/default.jpg')
+    in_stock = models.BooleanField(default=False)
+    quantity_available = models.IntegerField(validators=[MaxValueValidator(7858772994)], default=0)
 
-    def __str__(self):
-        return self.name
+    class Meta:
+        ordering = ['-in_stock']
 
     def get_absolute_url(self):
         # using this mostly for redirects in CBVs
@@ -51,5 +54,17 @@ class Game(models.Model):
             "pk": self.pk
         })
 
+    def get_template_readable_name(self):
+        return self.name.replace(' ', '_')
+
+
+    # def minus_quantity(self):
+    #     self.quantity_available -= 1
+    #
+    # def plus_quantity(self):
+    #     self.quantity_available += 1
+
+    def __str__(self):
+        return self.name
 
 

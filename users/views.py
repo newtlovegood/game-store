@@ -4,6 +4,7 @@ from django.views.generic import CreateView, TemplateView
 from django.contrib.auth import logout
 
 from users.forms import UserCreateForm
+from order.models import Order
 from django.contrib.auth.forms import UserCreationForm
 
 
@@ -18,6 +19,9 @@ class LogoutView(TemplateView):
     template_name = 'index.html'
 
     def logout(self, request):
+        # for order in Order.objects.filter(ordered=False):
+        #     order.destroy_order()
+        #     order.delete()
         logout(request)
 
 
