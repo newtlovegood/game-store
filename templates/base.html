@@ -43,7 +43,7 @@
           {% if user.is_authenticated %}
 
               <ul class="navbar-nav my-2 my-lg-0">
-                  <li class="nav-item"><a class="nav-link" href="{% url '' %}" >{{ user.first_name }} {{ user.last_name }}</a></li>
+                  <li class="nav-item"><a class="nav-link" href="#" >{{ user.first_name }} {{ user.last_name }}</a></li>
                   <li class="nav-item"><a class="nav-link" href="{% url 'order:order-current' %}" ><ion-icon name="cart-outline"></ion-icon></a></li>
                   <li class="nav-item"><a class="nav-link" href="{% url 'account_logout' %}" >Log Out</a></li>
               </ul>
