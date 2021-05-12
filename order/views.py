@@ -73,6 +73,10 @@ class OrderCheckoutView(FormView):
             order = Order.objects.filter(customer=self.request.user, ordered=False)[0]
         order.ordered = True
         order.save()
+        # set ordered for all items in order
+        for item in order.items.all():
+            item.ordered = True
+            item.save()
         self.get_confirm_message()
         return super().form_valid(form)
 
@@ -94,17 +98,31 @@ def add_to_cart(request, pk):
         )
         order_qs = Order.objects.filter(customer=request.user, ordered=False)
 
+    # checks if Unordered order exists
     if order_qs.exists():
+        # takes the first of unordered
         order = order_qs[0]
-
+        # checks if THIS game already added to order
         if order.items.filter(item__pk=item.pk).exists():
-            order_item.quantity += 1
-            order_item.save()
-            order.increase_total(item)
-            messages.info(request, "Added quantity Item")
-            return redirect("games:detail", pk=pk)
+            print('ok1')
+            # check if item has enough qty
+            if item.quantity_available > 0:
+                # adds +1 to current order item
+                order_item.quantity += 1
+                order_item.save()
+                # temp remove 1 from quantity available
+                order_item.adding_game_to_cart()
+                order.increase_total(item)
+                messages.info(request, "Added quantity Item")
+                return redirect("games:detail", pk=pk)
+            else:
+                messages.info(request, 'No more available!')
+                return redirect('games:detail', pk=pk)
+
         else:
             order.items.add(order_item)
+            # temp remove 1 from quantity available
+            order_item.adding_game_to_cart()
             order.increase_total(item)
             messages.info(request, "Item added to your cart")
             return redirect("games:detail", pk=pk)
@@ -112,6 +130,8 @@ def add_to_cart(request, pk):
         ordered_date = timezone.now()
         order = Order.objects.create(customer=request.user, date=ordered_date)
         order.items.add(order_item)
+        # temp remove 1 from quantity available
+        order_item.adding_game_to_cart()
         order.increase_total(item)
         messages.info(request, "Item added to your cart")
         return redirect("games:detail", pk=pk)
@@ -128,6 +148,7 @@ def remove_from_cart(request, pk):
     if order_qs.exists():
         # take only the first one
         order = order_qs[0]
+        # checks if THIS game IN order
         if order.items.filter(item__pk=item.pk).exists():
             order_item = OrderItem.objects.filter(
                 item=item,
@@ -138,9 +159,11 @@ def remove_from_cart(request, pk):
             if order_item.quantity > 1:
                 order_item.quantity -= 1
                 order_item.save()
+                order_item.remove_game_from_cart()
             else:
                 # deletes item
                 order_item.delete()
+                order_item.remove_game_from_cart()
             order.reduce_total(item)
             # in case no more items in order - it is deleted
             if not order.items.exists():
@@ -149,12 +172,14 @@ def remove_from_cart(request, pk):
             messages.info(request, "Item \""+order_item.item.name+"\" remove from your cart")
             return redirect("games:detail", pk=pk)
         else:
-            order.reduce_total(item)
             messages.info(request, "This Item not in your cart")
             return redirect("games:detail", pk=pk)
     else:
         #add message doesnt have order
         messages.info(request, "You do not have an Order")
         return redirect("games:detail", pk=pk)
+
+
+#### helper functions
 
 

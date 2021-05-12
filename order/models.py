@@ -25,7 +25,7 @@ class Order(models.Model):
             item.item.quantity_available += item.quantity
 
     def __str__(self):
-        return f"{self.customer.username}'s order"
+        return f"{self.customer.username}'s order - {'ordered' if self.ordered else 'NOT ordered'}"
 
 
 class OrderItem(models.Model):
@@ -34,15 +34,13 @@ class OrderItem(models.Model):
     item = models.ForeignKey(Game, on_delete=models.CASCADE)
     quantity = models.IntegerField(default=1)
 
-    def create_order_item(self, user, item, ordered=False):
-        if user.is_anonymous:
-            order_item = OrderItem.objects.create(
-                item=item,
-                ordered=False
-            )
-            order_qs = Order.objects.filter(ordered=False)
+    def adding_game_to_cart(self):
+        self.item.quantity_available -= 1
+        self.item.save()
 
-
+    def remove_game_from_cart(self):
+        self.item.quantity_available += 1
+        self.item.save()
 
     def __str__(self):
-        return f"{self.quantity} piece(s) of {self.item.name}"
+        return f"{self.quantity} piece(s) of {self.item.name} - {'ordered' if self.ordered else 'NOT ordered'}"

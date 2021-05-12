@@ -19,12 +19,13 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 from . import views
+from games.views import HomePageView
 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('games/', include('games.urls')),
-    path('', include('games.urls')),
+    path('', HomePageView.as_view(), name='home'),
     path('accounts/', include('allauth.urls')),
     path('order/', include('order.urls')),
     path('thanks/', views.ThanksView.as_view(), name='thanks'),

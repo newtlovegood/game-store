@@ -6,7 +6,7 @@
         <h2 class="mb-3">Order of {{ cur_order.customer }}</h2>
         <ul class="list-unstyled">
         {% for item in cur_order.items.all %}
-            <li class=""><span class="">{{ item }}</span><a class="btn btn-danger float-right" href="{% url 'order:remove-from-cart' item.item.id %}">Remove from cart</a></li>
+            <li class=""><span class="">{{ item.item }}</span> <span class="">{{ item.quantity }} pcs</span><a class="btn btn-danger float-right" href="{% url 'order:remove-from-cart' item.item.id %}">Remove from cart</a></li>
             <br>
         {% endfor %}
         </ul>
