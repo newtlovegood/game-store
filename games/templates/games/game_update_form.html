@@ -3,7 +3,7 @@
 
 
 {% block content %}
-    <div class="jumbotron">
+    <div class="detail-container p-3">
         <form method="post" action="" enctype="multipart/form-data">
             {% csrf_token %}
             {{ form|crispy}}

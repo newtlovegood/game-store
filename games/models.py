@@ -1,3 +1,4 @@
+import uuid
 from django.db import models
 from django.urls import reverse
 from django.core.validators import MaxValueValidator
@@ -29,16 +30,19 @@ class Genre(models.Model):
 
 class Game(models.Model):
 
+    id = models.UUIDField(
+        primary_key=True,
+        default=uuid.uuid4,
+        editable=False)
     name = models.CharField(max_length=300)
     price = models.FloatField()
     description = models.TextField(default='')
     genre = models.ManyToManyField(Genre, blank=True)
     image = models.ImageField(upload_to='images/games', default='images/games/default.jpg')
-    in_stock = models.BooleanField(default=False)
     quantity_available = models.IntegerField(validators=[MaxValueValidator(7858772994)], default=0)
 
     class Meta:
-        ordering = ['-in_stock']
+        ordering = ['-quantity_available']
 
     def get_absolute_url(self):
         # using this mostly for redirects in CBVs

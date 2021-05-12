@@ -42,7 +42,7 @@
                                 <div class="game-info">
                                     <div class="purchase-info">
                                         <p class="price">${{ game.price }}</p>
-                                            {% if not game.in_stock %}
+                                            {% if game.quantity_available < 1 %}
                                                 <button disabled class="btn btn-dark float-right" href="{% url 'order:add-to-cart' game.id %}">Buy</button>
                                                 <p class="text-sm-center">Out of Stock</p>
                                             {% else %}

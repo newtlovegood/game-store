@@ -2,7 +2,7 @@
 {% load  static %}
 {% load crispy_forms_tags %}
 
-<div class="form-control">
+<div class="detail-container p-3">
     <form method="post" action="">
         {% csrf_token %}
         {{ form|crispy }}
@@ -40,12 +40,13 @@
                 <div class="bg-light p-2">
                     <div class="d-flex flex-row align-items-start">
                         <img class="rounded-circle" src="https://i.imgur.com/RpzrMR2.jpg" width="40">
-                    <form method="post" action="">
-                        {% csrf_token %}
-                        {{ form|crispy }}
-                        <input class="btn-danger" type="reset" name="cancel" value="Cancel">
-                        <input class="btn-success" type="submit" name="submit" value="Submit comment">
-                    </form>
+                        <form method="post" action="">
+                            {% csrf_token %}
+                            {{ form|crispy }}
+                            <input class="btn-danger" type="reset" name="cancel" value="Cancel">
+                            <input class="btn-success" type="submit" name="submit" value="Submit comment">
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>

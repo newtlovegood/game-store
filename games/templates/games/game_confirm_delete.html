@@ -3,9 +3,9 @@
 
 {%  block content %}
 
-<form class="form-control" method="post">
+<form class="detail-container p-3" method="post">
     {% csrf_token %}
-    <p>Are you sure you want to delete "{{ object.name }}"?</p>
+    <h4>Are you sure you want to delete "{{ object.name }}"?</h4>
     <input class=" btn btn-danger" type="submit" value="Confirm">
 </form>
 
