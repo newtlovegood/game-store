@@ -152,6 +152,8 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # UI forms
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
+# USER MANAGEMENT
+AUTH_USER_MODEL = 'users.CustomUser'
 # django-allauth config
 SITE_ID = 1
 ACCOUNT_SESSION_REMEMBER = None
@@ -160,4 +162,11 @@ AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
     'allauth.account.auth_backends.AuthenticationBackend',
     )
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+ACCOUNT_SIGNUP_PASSWORD_ENTER_TWICE = False
+# ACCOUNT_USERNAME_REQUIRED = False
+# ACCOUNT_AUTHENTICATION_METHOD = 'email'
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_UNIQUE_EMAIL = True
 
