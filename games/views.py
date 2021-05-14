@@ -59,7 +59,6 @@ class GameCreateView(UserPassesTestMixin, CreateView):
 
     def post(self, request, *args, **kwargs):
         form = self.get_form(self.form_class)
-        print(form)
         if form.is_valid():
             form.save()
             return self.form_valid(form)
@@ -122,7 +121,6 @@ class GameSearchView(ListView):
     def get_queryset(self):
         # to GET VALUE from search form
         query = self.request.GET.get('q')
-        print(self.request.GET)
         games = get_list_or_404(Game.objects.filter(name__icontains=query))
         return games
 
