@@ -159,6 +159,10 @@ ion-icon {
     float:right;
 }
 
+#genre-select {
+    display: none;
+}
+
 /*----------------------------SCROLLBAR----------------------*/
 
 /* width */
@@ -191,4 +195,6 @@ ion-icon {
 .detail-container img {
     display: block;
     margin: auto;
+    width: 100%;
+    height: auto;
 }

@@ -4,9 +4,9 @@
 
 {% block content %}
 
-    <div class="detail-container p-3"></div>
-<p>{{ user.username }}</p>
-<img src={{ user.profile.image.url }} >
+    <div class="detail-container p-3">
+    <p>{{ user.username }}</p>
+    <img class="text-center" src={{ user.profile.image.url }} >
 
     <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
@@ -14,5 +14,6 @@
         {{ form_profile|crispy }}
         <input class="btn btn-success" type="submit" value="Update">
     </form>
+    </div>
 
 {% endblock %}

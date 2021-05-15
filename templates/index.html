@@ -16,11 +16,20 @@
                 <a class="btn btn-success" href="{% url 'games:add' %}" >Add game</a>
             {% endif %}
 
-            <button class="btn ">Genre</button>
+            <button class="btn " onclick="$('#genre-select').toggle(); ">Genre</button>
 
             <form class="search-box form-inline my-lg-0" action="{% url 'games:search' %}" method="get">
-                {{ form|crispy }}
+                {{ form_search|crispy }}
             </form>
+
+            <div class="" id="genre-select">
+                <form class="form-inline my-lg-0" action="{% url 'games:filter' %}" method="get">
+                    <div>
+                        <input class="btn btn-info" type="submit" value="Filter">
+                    </div>
+                    {{ form_filter|crispy}}
+                </form>
+            </div>
         </div>
 
 
@@ -55,7 +64,7 @@
                                         <div class="game-genre">
                                             {% if game.genre.all %}
                                                 <p>{% for genre in game.genre.all %}
-                                                    <a href="{% url 'games:filter' genre.name %}">{{ genre }}</a>
+                                                    <a href="{% url 'games:filter' genre.pk %}">{{ genre }}</a>
                                                 {% endfor %}</p>
                                             {% endif %}
                                         </div>
