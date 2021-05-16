@@ -14,43 +14,17 @@
 
 
 {% for comment in object.comment_set.all %}
+    <div class="container">
+    <p class=""><img class="float-left profile-img rounded-circle mr-3 mt-3" src="{{ comment.username.profile.image.url }}"><b>{{ comment.username.username }}</b><span> {{ comment.timestamp }}</span></p>
+    <p class="">{{ comment.content }}
+    <button class="btn-sm btn-info" onclick="getElementById('com-{{ comment.id }}').style.display = 'block';">Reply</button>
+    </p>
 
-<div class="container mt-5">
-    <div class="d-flex row">
-        <div class="col-md-8">
-            <div class="d-flex flex-column comment-section">
-                <div class="bg-white p-2">
-                    <div class="d-flex flex-row user-info">
-                        <img class="rounded-circle" src="/media/images/profiles/default.jpg" width="40">
-                        <div class="d-flex flex-column justify-content-start ml-2">
-                            <span class="d-block font-weight-bold name">{{ comment.username }}</span>
-                            <span class="date text-black-50">{{ comment.timestamp }}</span>
-                        </div>
-                    </div>
-                    <div class="mt-2">
-                        <p class="comment-text">{{ comment.content }}</p>
-                    </div>
-                </div>
-                <div class="bg-white">
-                    <div class="d-flex flex-row fs-12">
-                        <div class="like p-2 cursor"><i class="fa fa-thumbs-o-up"></i><span class="ml-1">Like</span></div>
-                        <div class="like p-2 cursor"><i class="fa fa-commenting-o"></i><span class="ml-1">Reply</span></div>
-                    </div>
-                </div>
-                <div class="bg-light p-2">
-                    <div class="d-flex flex-row align-items-start">
-                        <img class="rounded-circle" src="https://i.imgur.com/RpzrMR2.jpg" width="40">
-                        <form method="post" action="">
-                            {% csrf_token %}
-                            {{ form|crispy }}
-                            <input class="btn-danger" type="reset" name="cancel" value="Cancel">
-                            <input class="btn-success" type="submit" name="submit" value="Submit comment">
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
+    <form id="com-{{ comment.id }}" class="reply-form" method="post" action="">
+        {% csrf_token %}
+        {{ form|crispy }}
+        <input class="btn-danger" type="reset" name="cancel" value="Cancel" onclick="getElementById('com-{{ comment.id }}').style.display = 'none';">
+        <input class="btn-success" type="submit" name="submit" value="Submit comment">
+    </form>
     </div>
-</div>
-
 {% endfor %}

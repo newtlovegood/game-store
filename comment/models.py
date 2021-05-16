@@ -13,6 +13,9 @@ class Comment(models.Model):
     content = models.TextField(max_length=600)
     parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, related_name='children', blank=True)
 
+    class Meta:
+        ordering = ['-timestamp']
+
     def __str__(self):
         return f"{self.username}'s comment"
 

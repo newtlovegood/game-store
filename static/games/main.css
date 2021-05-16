@@ -155,6 +155,8 @@ ion-icon {
     /*text-align: center;*/
 }
 
+/*----------------------------filter/search----------------------*/
+
 .search-box {
     float:right;
 }
@@ -197,4 +199,18 @@ ion-icon {
     margin: auto;
     width: 100%;
     height: auto;
+}
+
+/*---------------------------- comments ----------------------*/
+
+.reply-form {
+    display: none;
+}
+
+.profile-img {
+    display: block;
+    max-width: 75px;
+    max-height: 75px;
+    width: auto !important;
+    height: auto !important;
 }
