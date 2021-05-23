@@ -13,20 +13,48 @@
         {% endfor %}</p>
     {% endif %}
     <p>{{ object.description }}</p>
-    {% if user.is_authenticated %}
-        <a class="btn btn-large btn-success" href="{% url 'order:add-to-cart' object.pk %}">BUY</a>
-    {% else %}
-        <a class="btn btn-large btn-success" href="{% url 'account_login' %}">BUY</a>
-    {% endif %}
+    <div class="crud-buttons">
+        <button class="btn btn-large btn-success" id="add-to-cart" value="{{ object.id }}" href="{% url 'order:add-to-cart' %}">Add to Cart</button>
+        <select class="dropdown show" id="select">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+        </select>
     {% if request.user|has_group:'managers' %}
         <a class="btn btn-large btn-info" href="{% url 'games:edit' object.id %}">EDIT</a>
         <a class="btn btn-large btn-danger" href="{% url 'games:delete' object.id %}">DELETE</a>
     {% endif %}
+    </div>
 
+    <script>
+        $(document).on('click', '#add-to-cart', function (e) {
+            e.preventDefault();
+            $.ajax({
+                type: 'POST',
+                url: '{% url "order:add-to-cart" %}',
+                data: {
+                    gameId: $('#add-to-cart').val(),
+                    gameQty: $('#select option:selected').text(),
+                    csrfmiddlewaretoken: "{{ csrf_token }}",
+                    action: 'post',
+                },
+                success: function (json) {
+                    if (json.message) {
+                        mbar(json.message, 'info');
+                        $("html, body").animate({ scrollTop: 0 }, "medium");
+                    }
+                    document.getElementById('cart-qty').innerHTML = json.qty;
+                },
+                error: function (xhr, errmsg, err) {
+                }
+            });
+        })
 
+    </script>
 
 {# Comment section #}
-<h3>Comment</h3>
 {% include 'comment/_comments.html' %}
 
 

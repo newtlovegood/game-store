@@ -2,16 +2,128 @@
 
 {% block content %}
 
+
     <div class="p-3 detail-container">
-        <h2 class="mb-3">Order of {{ cur_order.customer }}</h2>
-        <ul class="list-unstyled">
+        <h2 class="mb-3">Cart</h2>
         {% for item in cur_order.items.all %}
-            <li class=""><span class="">{{ item.item }}</span> <span class="">{{ item.quantity }} pcs</span><a class="btn btn-danger float-right" href="{% url 'order:remove-from-cart' item.item.id %}">Remove from cart</a></li>
+            <div class="row mb-2 delete-entry" data-index="{{ item.item.id }}">
+                <div class="col-md-4 align-bottom">
+                    <a class="game-name" href="{% url 'games:detail' item.item.id %}">{{ item.item }}</a></div>
+                <div class="col-md-4">
+                    <div class="float-right">
+                        <button id="cart-minus" class="btn btn-outline-secondary cart-minus" data-index="{{ item.item.id }}">-</button>
+                        <input disabled id="cart-item-qty" class="border-0 text-center m-2 cart-item-qty" data-index="{{ item.item.id }}" value="{{ item.quantity }}">
+                        <button id="cart-plus" class="btn btn-outline-secondary cart-plus" data-index="{{ item.item.id }}">+</button>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <button id="delete-from-cart" data-index="{{ item.item.id }}" class="btn btn-danger float-right delete-from-cart" href="{% url 'order:remove-from-cart'%}">Remove from cart</button>
+                </div>
+            </div>
             <br>
         {% endfor %}
-        </ul>
         <p>Date created: {{ cur_order.date }}</p>
-        <p>Order total: ${{ cur_order.total }}</p>
+        <p>Order total: $<span id="order-total" class="text-lg-center">{{ cur_order.total }}</span></p>
         <p><a class="btn btn-success" href="{% url 'order:checkout' %}">CHECKOUT</a></p>
     </div>
+    <script>
+// REMOVE BUTTON
+                $(document).on('click', '.delete-from-cart', function (e) {
+                    e.preventDefault();
+                    let itemId = $(this).data('index');
+                    $.ajax({
+                        type: 'POST',
+                        url: "{% url 'order:remove-from-cart' %}",
+                        data: {
+                            gameId: itemId,
+                            csrfmiddlewaretoken: "{{ csrf_token }}",
+                            action: 'post',
+                        },
+                        success: function (json) {
+                            if (typeof json.deleted != "undefined") {
+                                window.location.href = {% url 'games:home' %} ;
+                            } else if (json.message){
+                                mbar(json.message, 'info');
+                            } else {
+                                $('.delete-entry[data-index="' + itemId +'"]').remove();
+                                document.getElementById('order-total').innerHTML = json.total;
+                                document.getElementById('cart-qty').innerHTML = json.qty;
+
+                            }
+                        },
+                        error: function (xhr, errmsg, err) {
+                        }
+                    });
+                })
+// PLUS BUTTON
+                $('.cart-plus').each(function (){
+                    let plusButton = this;
+
+                  $(this).on('click', function (){
+                      $.ajax({
+                        type: 'POST',
+                        url: '{% url "order:increment-to-cart" %}',
+                        data: {
+                            gameId: $(this).data('index'),
+                            csrfmiddlewaretoken: "{{ csrf_token }}",
+                            action: 'post',
+                        },
+                        success: function (json) {
+                            if (json.message) {
+                                mbar(json.message, 'info')
+                            } else {
+                                let valueCount = $(plusButton).siblings()[1].value;
+                                valueCount ++;
+                                $(plusButton).siblings()[1].value = valueCount;
+
+                                if ($(plusButton).siblings()[1].value > 0) {
+                                $(plusButton).siblings()[0].removeAttribute('disabled');
+                                }
+                                document.getElementById('cart-qty').innerHTML = json.qty;
+                                document.getElementById('order-total').innerHTML = json.total;
+                            }
+                        },
+                        error: function (xhr, errmsg, err) {
+                        }
+                    });
+                  })
+                })
+// MINUS BUTTON
+                $('.cart-minus').each(function (){
+                  // if added qty === 1 then minus is disabled
+                  if ($(this).siblings()[0].value == 1) {
+                    this.setAttribute('disabled', 'disabled');
+                  }
+                  // click event
+                  $(this).on('click', function (){
+                    // reduce by 1
+                    valueCount = $(this).siblings()[0].value;
+                    valueCount --;
+                    $(this).siblings()[0].value = valueCount;
+
+                    // disable if less than 2
+                    if (valueCount == 1) {
+                      this.setAttribute('disabled', 'disabled');
+                    }
+                    // ajax call
+                    $.ajax({
+                                type: 'POST',
+                                url: '{% url "order:reduce-in-cart" %}',
+                                data: {
+                                    gameId: $(this).data('index'),
+                                    csrfmiddlewaretoken: "{{ csrf_token }}",
+                                    action: 'post',
+                                },
+                                success: function (json) {
+                                    document.getElementById('cart-qty').innerHTML = json.qty;
+                                    document.getElementById('order-total').innerHTML = json.total;
+                                },
+                                error: function (xhr, errmsg, err) {
+                                }
+                            });
+
+                  })
+                })
+        </script>
+
 {% endblock %}

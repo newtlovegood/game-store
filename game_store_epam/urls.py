@@ -19,7 +19,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 from . import views
-from users.views import profile_update, ProfileUpdate
+from users.views import profile_update, ProfileUpdate, CustomLogoutView, CustomLoginView
 from games.views import HomePageView
 
 
@@ -28,6 +28,8 @@ urlpatterns = [
     path('games/', include('games.urls')),
     path('', HomePageView.as_view(), name='home'),
     path('accounts/', include('allauth.urls')),
+    path('accounts/login', CustomLoginView.as_view(), name='account_login'),
+    path('accounts/logout', CustomLogoutView.as_view(), name='account_logout'),
     path('accounts/profile', ProfileUpdate.as_view(), name='profile'),
     path('order/', include('order.urls')),
     path('thanks/', views.ThanksView.as_view(), name='thanks'),

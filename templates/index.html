@@ -51,13 +51,19 @@
                                 <div class="game-info">
                                     <div class="purchase-info">
                                         <p class="price">${{ game.price }}</p>
-                                            {% if game.quantity_available < 1 %}
-                                                <button disabled class="btn btn-dark float-right" href="{% url 'order:add-to-cart' game.id %}">Buy</button>
-                                                <p class="text-sm-center">Out of Stock</p>
+                                            {% if game.id|slugify in request.session.cart %}
+                                                <a id="buy-button" data-index="{{ game.id }}" class="btn btn-success float-right" href="{% url 'order:order-current' %}"><ion-icon name="cart-outline"></ion-icon></a>
                                             {% else %}
-                                                <a class="btn btn-success float-right" href="{% url 'order:add-to-cart' game.id %}">Buy</a>
-                                                <p class="text-sm-center">Available</p>
+
+                                                {% if game.quantity_available < 1 %}
+                                                    <button disabled class="btn btn-dark float-right" href="#">Buy</button>
+                                                    <p class="text-sm-center">Out of Stock</p>
+                                                {% else %}
+                                                    <a id="buy-button" data-index="{{ game.id }}" class="btn btn-success float-right add-to-cart-home" href="{% url 'order:add-to-cart' %}">Buy</a>
+                                                    <p class="text-sm-center">Available</p>
+                                                {% endif %}
                                             {% endif %}
+
                                     </div>
 
                                     <div class="game-data p-2">
@@ -83,5 +89,37 @@
         </div>
 
     </div>
+
+    <script>
+        $(document).on('click', '.add-to-cart-home', function (e) {
+            e.preventDefault();
+            let itemId = $(this).data('index');
+            $.ajax({
+                type: 'POST',
+                url: '{% url "order:add-to-cart" %}',
+                data: {
+                    gameId: itemId,
+                    gameQty: 1,
+                    csrfmiddlewaretoken: "{{ csrf_token }}",
+                    action: 'post',
+                },
+                success: function (json) {
+                    document.getElementById('cart-qty').innerHTML = json.qty;
+                    let addedItem = $('#buy-button[data-index="' + itemId + '"');
+                    addedItem.html('<ion-icon name="cart-outline">');
+                    addedItem.attr('href', '{% url "order:order-current" %}');
+                    addedItem.removeClass('add-to-cart-home');
+                    mbar('Item added to Cart', 'info');
+                },
+                error: function (xhr, errmsg, err) {
+
+                }
+
+            });
+
+
+        })
+
+    </script>
 
 {% endblock %}

@@ -1,10 +1,10 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.views.generic import View
-from django.views.generic.edit import FormMixin
-
+from allauth.account.views import LogoutView, LoginView
 
 from .forms import ProfileUpdateForm, CustomUserChangeForm
+from order.models import Order
 
 
 @login_required
@@ -55,4 +55,28 @@ class ProfileUpdate(View):
         context = {'form_user': form_user, 'form_profile': form_profile}
         render(request, self.template_name, context)
 
+
+class CustomLogoutView(LogoutView):
+
+    def get(self, *args, **kwargs):
+        return super().get(*args, **kwargs)
+
+
+class CustomLoginView(LoginView):
+    
+    def form_valid(self, form):
+        print('login')
+
+        try:
+            a = super().form_valid(form)
+            print('asdasd')
+            print(Order.objects.all())
+            o = Order.objects.get(ordered=False)
+            o.customer = self.request.user
+            o.save()
+
+        except Order.DoesNotExist:
+            pass
+
+        return a
 

@@ -1,5 +1,6 @@
+from django.http import JsonResponse
 from django.views.generic import ListView, DetailView, FormView
-from django.shortcuts import get_list_or_404, get_object_or_404, redirect
+from django.shortcuts import get_list_or_404, get_object_or_404, redirect, render
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from django.contrib import messages
@@ -7,10 +8,10 @@ from django.contrib import messages
 from order.models import Order, OrderItem
 from order.forms import OrderCheckoutForm
 from games.models import Game
+from .cart import Cart
 
 
 class UserOrderView(ListView):
-
     model = Order
     template_name_suffix = '_user'
 
@@ -21,23 +22,25 @@ class UserOrderView(ListView):
 
 
 class UserCurrentOrderView(ListView):
-
     model = Order
     template_name_suffix = '_current'
+    template_name = 'order/order_current.html'
 
-    def get_context_data(self, *, object_list=None, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['cur_order'] = get_object_or_404(Order.objects.filter(ordered=False))
-        return context
+    def get(self, request, *args, **kwargs):
+        context = {}
+        try:
+            context['cur_order'] = Order.objects.get(ordered=False)
+            return render(request, self.template_name, context)
+        except Order.DoesNotExist:
+            messages.info(request, 'No items in Cart')
+            return redirect('/')
 
 
 class AllOrdersView(ListView):
-
     model = Order
 
 
 class OrderDetailView(DetailView):
-
     model = Order
 
     def get_context_data(self, **kwargs):
@@ -47,7 +50,6 @@ class OrderDetailView(DetailView):
 
 
 class OrderCheckoutView(FormView):
-
     template_name = 'order/order_checkout.html'
     form_class = OrderCheckoutForm
     success_url = '/thanks/'
@@ -67,119 +69,204 @@ class OrderCheckoutView(FormView):
         return context
 
     def form_valid(self, form):
-        if self.request.user.is_anonymous:
-            order = Order.objects.filter(ordered=False)[0]
-        else:
-            order = Order.objects.filter(customer=self.request.user, ordered=False)[0]
+        order = Order.objects.filter(ordered=False)[0]
         order.ordered = True
         order.save()
         # set ordered for all items in order
         for item in order.items.all():
             item.ordered = True
             item.save()
+        # clear basket
+        cart = Cart(self.request)
+        cart.clear()
         self.get_confirm_message()
         return super().form_valid(form)
 
 
-def add_to_cart(request, pk):
-    item = get_object_or_404(Game, pk=pk)
-    if request.user.is_anonymous:
-        order_item = OrderItem.objects.create(
-            item=item,
-            ordered=False
-        )
+def add_to_basket(request):
+    cart = Cart(request)
+    if request.POST.get('action') == 'post':
+        # GETS game DATA FROM AJAX REQUEST
+        game_id = request.POST.get('gameId')
+        game_qty = int(request.POST.get('gameQty'))
+        # check if game exists
+        try:
+            game = Game.objects.get(pk=game_id)
+        except Game.DoesNotExist:
+            return JsonResponse({'message': 'Game not found'})
+        # CHECKS IF ANY OPEN ORDER
         order_qs = Order.objects.filter(ordered=False)
+        if order_qs.exists():
+            order = order_qs[0]
+            add_new_item_to_order(request,
+                                  game_qty,
+                                  game,
+                                  order)
+        else:
+            # create new order
+            order = Order.objects.create()
+            add_new_item_to_order(request,
+                                  game_qty,
+                                  game,
+                                  order)
 
+        # ADDS GAME TO SESSION DICT
+        actual_qty = order.items.get(item_id=game_id).quantity
+        cart.add(game, actual_qty)
+        # get total QTY of basket
+        cart_length = cart.__len__()
+        # message
+        if game_qty != actual_qty:
+            return JsonResponse({'message': 'Item quantity was adjusted!', 'total': order.total, 'qty': cart_length})
+        return JsonResponse({'total': order.total, 'qty': cart_length})
+
+
+def remove_from_basket(request):
+    cart = Cart(request)
+    if request.POST.get('action') == 'post':
+        game_id = request.POST.get('gameId')
+        game = get_object_or_404(Game, id=game_id)
+        order_qs = Order.objects.filter(ordered=False)
+        if order_qs.exists():
+            order = order_qs[0]
+            # CHECK IF THE SAME GAME IS ALREADY THERE
+            if order.items.filter(item__pk=game.pk).exists():
+                order_item = order.items.get(item__pk=game.pk)
+                # delete from order
+                order.items.get(item__pk=game.pk).delete()
+                # update total price
+                order.calculate_total()
+                # update qty_available for game
+                order_item.remove_game_from_cart()
+                # delete order_item
+                order_item.delete()
+                # delete from session
+                cart.delete(game)
+                cart_qty = cart.__len__()
+                response = {'total': order.total, 'qty': cart_qty}
+                if not order.items.exists():
+                    order.delete()
+                    del cart
+                    response = {'deleted': 0}
+                return JsonResponse(response)
+            else:
+                return JsonResponse({'message': 'Item not in cart'})
+        else:
+            return JsonResponse({'message': 'Order does not exist'})
+
+    return redirect('order:order-current')
+
+
+def increment_to_basket(request):
+    cart = Cart(request)
+    game_id = str(request.POST.get('gameId'))
+    # check if ajax called right
+    if request.POST.get('action') == 'post':
+        # check if game exists
+        try:
+            game = Game.objects.get(pk=game_id)
+        except Game.DoesNotExist:
+            return JsonResponse({'message': 'Game not found'})
+        # check if item in basket and in order
+        try:
+            order = Order.objects.get(ordered=False)
+            order_item = order.items.get(item_id=game_id)
+        except (Order.DoesNotExist, OrderItem.DoesNotExist):
+            return JsonResponse({'message': 'Order/Item not found'})
+
+        # check if QTY-AVAILABLE enough
+        if not check_if_qty_is_enough(request,
+                                      1,
+                                      game,
+                                      order_item,
+                                      order):
+            return JsonResponse({'message': 'We can\'t get you more than this ! :('})
+
+        # game_avlbl reduce
+        game.quantity_available -= 1
+        game.save()
+        # order/item increase
+        order_item.quantity += 1
+        order_item.save()
+        # calc total in order
+        order.calculate_total()
+        # add to cart
+        cart.add(game, 1)
+        # cart total QTY
+        cart_qty = cart.__len__()
+        # response
+        return JsonResponse({'qty': cart_qty, 'total': order.total})
     else:
-        order_item, created = OrderItem.objects.get_or_create(
-            item=item,
+        return redirect('order:order-current')
+
+
+def reduce_from_basket(request):
+    cart = Cart(request)
+    game_id = str(request.POST.get('gameId'))
+    # check if ajax called right
+    if request.POST.get('action') == 'post':
+        # check if game exists
+        try:
+            game = Game.objects.get(pk=game_id)
+        except Game.DoesNotExist:
+            return JsonResponse({'message': 'Game not found'})
+        # check if item in basket and in order
+        try:
+            order = Order.objects.get(ordered=False)
+            order_item = order.items.get(item_id=game_id)
+        except (Order.DoesNotExist, OrderItem.DoesNotExist):
+            return JsonResponse({'message': 'Order/Item not found'})
+
+        # game.available +1
+        game.quantity_available += 1
+        game.save()
+        # reduce from order/item
+        order_item.quantity -= 1
+        order_item.save()
+        # calc total in order
+        order.calculate_total()
+        # reduce from cart
+        cart.remove(game)
+        # cart total qty
+        cart_qty = cart.__len__()
+        # response json
+        return JsonResponse({'qty': cart_qty, 'total': order.total})
+    # message - something is wrong
+    else:
+        return redirect('order:order-current')
+
+
+######## helper functions ######
+
+
+def check_if_qty_is_enough(request, requested_qty, game, order_item, order):
+    if game.quantity_available <= 0:
+        return False
+    elif game.quantity_available > 0:
+        if requested_qty > game.quantity_available:
+            requested_qty = game.quantity_available
+        order_item.adding_game_to_cart(requested_qty)
+        order.calculate_total()
+        return True
+
+
+def add_new_item_to_order(request, requested_qty, game, order):
+    if request.user.is_authenticated:
+        order_item = OrderItem.objects.create(
+            item=game,
             user=request.user,
+            quantity=requested_qty,
             ordered=False
         )
-        order_qs = Order.objects.filter(customer=request.user, ordered=False)
-
-    # checks if Unordered order exists
-    if order_qs.exists():
-        # takes the first of unordered
-        order = order_qs[0]
-        # checks if THIS game already added to order
-        if order.items.filter(item__pk=item.pk).exists():
-            print('ok1')
-            # check if item has enough qty
-            if item.quantity_available > 0:
-                # adds +1 to current order item
-                order_item.quantity += 1
-                order_item.save()
-                # temp remove 1 from quantity available
-                order_item.adding_game_to_cart()
-                order.increase_total(item)
-                messages.info(request, "Added quantity Item")
-                return redirect("games:detail", pk=pk)
-            else:
-                messages.info(request, 'No more available!')
-                return redirect('games:detail', pk=pk)
-
-        else:
-            order.items.add(order_item)
-            # temp remove 1 from quantity available
-            order_item.adding_game_to_cart()
-            order.increase_total(item)
-            messages.info(request, "Item added to your cart")
-            return redirect("games:detail", pk=pk)
     else:
-        ordered_date = timezone.now()
-        order = Order.objects.create(customer=request.user, date=ordered_date)
-        order.items.add(order_item)
-        # temp remove 1 from quantity available
-        order_item.adding_game_to_cart()
-        order.increase_total(item)
-        messages.info(request, "Item added to your cart")
-        return redirect("games:detail", pk=pk)
-
-
-def remove_from_cart(request, pk):
-    # takes an item(game)
-    item = get_object_or_404(Game, pk=pk)
-    # takes all order of user which are not ordered
-    order_qs = Order.objects.filter(
-        customer=request.user,
-        ordered=False
-    )
-    if order_qs.exists():
-        # take only the first one
-        order = order_qs[0]
-        # checks if THIS game IN order
-        if order.items.filter(item__pk=item.pk).exists():
-            order_item = OrderItem.objects.filter(
-                item=item,
-                user=request.user,
-                ordered=False
-            )[0]
-
-            if order_item.quantity > 1:
-                order_item.quantity -= 1
-                order_item.save()
-                order_item.remove_game_from_cart()
-            else:
-                # deletes item
-                order_item.delete()
-                order_item.remove_game_from_cart()
-            order.reduce_total(item)
-            # in case no more items in order - it is deleted
-            if not order.items.exists():
-                order.delete()
-                return redirect("games:detail", pk=pk)
-            messages.info(request, "Item \""+order_item.item.name+"\" remove from your cart")
-            return redirect("games:detail", pk=pk)
-        else:
-            messages.info(request, "This Item not in your cart")
-            return redirect("games:detail", pk=pk)
-    else:
-        #add message doesnt have order
-        messages.info(request, "You do not have an Order")
-        return redirect("games:detail", pk=pk)
-
-
-#### helper functions
-
-
+        order_item = OrderItem.objects.create(
+            item=game,
+            quantity=requested_qty,
+            ordered=False
+        )
+    order.items.add(order_item)
+    check_if_qty_is_enough(request,
+                           requested_qty,
+                           game,
+                           order_item,
+                           order)

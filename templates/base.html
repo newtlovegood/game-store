@@ -11,6 +11,10 @@
 {#    bootstrap #}
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     <link rel="stylesheet" type="text/css" href="{% static 'games/main.css' %}">
+    {# icons #}
+    <script type="module" src="https://unpkg.com/ionicons@5.4.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule="" src="https://unpkg.com/ionicons@5.4.0/dist/ionicons/ionicons.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <title>Base</title>
 </head>
 
@@ -44,12 +48,33 @@
 
               <ul class="navbar-nav my-2 my-lg-0">
                   <li class="nav-item"><a class="nav-link" href="{% url 'profile' %}" >{{ user.username }}</a></li>
-                  <li class="nav-item"><a class="nav-link cart" href="{% url 'order:order-current' %}" ><ion-icon name="cart-outline"></ion-icon></a></li>
+                  <li class="nav-item"><a class="btn btn-outline-secondary cart" href="{% url 'order:order-current' %}">
+                      {% with total_qty=cart|length %}
+                          <div id="cart-qty" class="d-inline-flex">
+                              {% if total_qty > 0 %}
+                                  {{ total_qty }}
+                              {% else %}
+                                  0
+                              {% endif %}
+                          </div>
+                      {% endwith %}
+                      <ion-icon name="cart-outline"></ion-icon>
+                  </a></li>
                   <li class="nav-item"><a class="nav-link" href="{% url 'account_logout' %}" >Log Out</a></li>
               </ul>
           {% else %}
               <ul class="navbar-nav my-2 my-lg-0">
-                  <li><a class="nav-link cart"  href="{% url 'order:order-current' %}" ><ion-icon name="cart-outline"></ion-icon></a></li>
+                  <li><a class="nav-link cart"  href="{% url 'order:order-current' %}" >
+                      {% with total_qty=cart|length %}
+                          <div id="cart-qty" class="d-inline-flex">
+                              {% if total_qty > 0 %}
+                                  {{ total_qty }}
+                              {% else %}
+                                  0
+                              {% endif %}
+                          </div>
+                      {% endwith %}
+                      <ion-icon name="cart-outline"></ion-icon></a></li>
                   <li><button type="button" class="btn btn-light" data-toggle="modal" data-target="#loginModal"
                   onclick="getElementById('login-link').click()">LOGIN</button></li>
                   <li><button type="button" class="btn btn-dark ml-2" data-toggle="modal" data-target="#loginModal"
@@ -59,6 +84,7 @@
       </div>
     </nav>
 
+{#    DJANGO MESSAGES #}
     {% if messages %}
         {% for message in messages %}
             <div class="alert alert-dark alert-{{ message.tags }} text-center">
@@ -66,6 +92,10 @@
             </div>
         {% endfor %}
     {% endif %}
+
+{#    JS MESSAGES#}
+    <div id="mbar"></div>
+
 
     {% block filter %}
     {% endblock %}
@@ -169,11 +199,33 @@
   </div>
 </div>
 
+{#    css style #}
 
-{# icons #}
-<script src="https://unpkg.com/ionicons@5.4.0/dist/ionicons.js"></script>
+<style>
+    .mbar {
+        text-align: center;
+      padding: 5px;
+      margin: 5px;
+      background: #eee;
+      border: 1px solid #aaa;
+    }
+    .info {
+      background: #f1f6ff;
+      border: 1px solid #92aad4;
+    }
+    .err {
+      background: #ffe7f4;
+      border: 1px solid #ff6a6a;
+    }
+</style>
+
+
+
+{# my scripts#}
+<script src="{% static 'games/home-script.js' %}"></script>
+
 {# bootstrap js #}
-<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+{#<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>#}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 </body>
