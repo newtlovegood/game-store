@@ -32,6 +32,7 @@ urlpatterns = [
     path('accounts/logout', CustomLogoutView.as_view(), name='account_logout'),
     path('accounts/profile', ProfileUpdate.as_view(), name='profile'),
     path('order/', include('order.urls')),
+    path('comments/', include('comment.urls')),
     path('thanks/', views.ThanksView.as_view(), name='thanks'),
 
     # below RENDERS media images on local machine

@@ -1,13 +1,13 @@
 from django.urls import reverse_lazy
 from django.shortcuts import get_list_or_404, render
 from django.views.generic import TemplateView, DetailView, CreateView, UpdateView, DeleteView, ListView
-from django.views.generic.edit import ModelFormMixin, FormMixin
+from django.views.generic.edit import ModelFormMixin
 from django.contrib.auth.mixins import UserPassesTestMixin
-from django.db.models import Q
 
 from games.models import Game
 from games.forms import GameCreateForm, GameSearchForm, GameFilterForm
-from comment.forms import CommentForm
+from comment.forms import CommentForm, MPTTCommentForm
+from comment.models import Comment, MPTTComment
 
 
 class HomePageView(TemplateView):
@@ -30,26 +30,10 @@ class SingleGameView(ModelFormMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        # context['no_parent_comms'] = MPTTComment.objects.filter(parent=None).filter(game__id=self.object.id)
+        context['all_game_comments'] = MPTTComment.objects.filter(game__id=self.object.id)
         return context
 
-    def post(self, request, *args, **kwargs):
-        # if not request.user.is_authenticated:
-        #     return HttpResponseForbidden()
-        # self.object = self.get_object()
-
-        # ADDING GAME AND USER FIELDS TO FORM
-        form = self.get_form()
-        form.instance.game = Game.objects.filter(id=self.kwargs.get('pk'))[0]
-        form.instance.username = request.user
-        # parent fields to fill with Javascript
-        form.save()
-        if form.is_valid():
-            return self.form_valid(form)
-        else:
-            return self.form_invalid(form)
-
-    def form_valid(self, form, **kwargs):
-        return super().form_valid(form)
 
 
 class GameCreateView(UserPassesTestMixin, CreateView):

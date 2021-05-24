@@ -1,30 +1,40 @@
-{% load crispy_forms_filters %}
 {% load  static %}
-{% load crispy_forms_tags %}
+{% load mptt_tags %}
 
-<div class="detail-container p-3">
-    <form method="post" action="">
-        {% csrf_token %}
-        {{ form|crispy }}
-        <input class="btn btn-danger" type="reset" name="cancel" value="Cancel">
-        <input class="btn btn-success" type="submit" name="submit" value="Submit comment">
-    </form>
+<div class="container reply-section mb-1" data-index="{{ comment.id }}" style="border: 1px solid wheat; border-radius: 15px">
+    <div class="comment-wrap p-3">
+        <div class="comment-info">
+            {% if comment.username %}
+                <img class="float-left profile-img rounded-circle mr-3" src="{{ comment.username.profile.image.url }}">
+                <b>{{ comment.username.username }}</b>
+            {% else %}
+                <b>AnonymousUser</b>
+            {% endif %}
+            <span class="ml-3"> {{ comment.timestamp }}</span>
+        </div>
 
+        <div class="comment-data pt-3">
+            <p class="">{{ comment.content }}</p>
+        </div>
+
+        <div class="reply-button">
+                <ion-icon name="arrow-undo-outline"></ion-icon>
+            <a class="mr-2" data-index="{{ comment.id }}" onclick="getElementById('com-{{ comment.id }}').style.display = 'block';">Reply</a>
+            {% if request.user == comment.username %}
+                <a class="mr-2 edit-comment" id="edit-comment" data-index="{{ comment.id }}">Edit</a>
+                <a class="mr-2 delete-comment" id="delete-comment" data-index="{{ comment.id }}">Delete</a>
+            {% endif %}
+        </div>
+
+        <div id="com-{{ comment.id }}" class="reply-form detail-container p-3 mb-3">
+            <form method="post" action="">
+                {% csrf_token %}
+                <textarea class="form-control comment-form-data" type="text" data-index="{{ comment.id }}" name="comment-text"></textarea>
+                <input class="btn btn-danger" type="reset" name="cancel" value="Cancel" onclick="getElementById('com-{{ comment.id }}').style.display = 'none';">
+                <input class="btn btn-success comment-reply-send" type="submit" name="submit" data-index="{{ comment.id }}" value="Submit comment">
+            </form>
+        </div>
+    </div>
 </div>
 
 
-{% for comment in object.comment_set.all %}
-    <div class="container">
-    <p class=""><img class="float-left profile-img rounded-circle mr-3 mt-3" src="{{ comment.username.profile.image.url }}"><b>{{ comment.username.username }}</b><span> {{ comment.timestamp }}</span></p>
-    <p class="">{{ comment.content }}
-    <button class="btn-sm btn-info" onclick="getElementById('com-{{ comment.id }}').style.display = 'block';">Reply</button>
-    </p>
-
-    <form id="com-{{ comment.id }}" class="reply-form" method="post" action="">
-        {% csrf_token %}
-        {{ form|crispy }}
-        <input class="btn-danger" type="reset" name="cancel" value="Cancel" onclick="getElementById('com-{{ comment.id }}').style.display = 'none';">
-        <input class="btn-success" type="submit" name="submit" value="Submit comment">
-    </form>
-    </div>
-{% endfor %}

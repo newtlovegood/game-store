@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% load custom_tags %}
 
+
 {% block content %}
 
 <div class="detail-container p-3">
@@ -28,6 +29,62 @@
     {% endif %}
     </div>
 
+
+    <div class="detail-container p-3">
+        <form method="post" action="">
+            {% csrf_token %}
+            <textarea class="form-control mb-3" id="comment-form-data" type="text" name="comment-text"></textarea>
+            <input class="btn btn-danger" type="reset" name="cancel" value="Cancel">
+            <input id="comment-send" class="btn btn-success" type="submit" name="submit" value="Submit comment">
+        </form>
+    </div>
+
+    <div id="comments" class="comments">
+    {% load mptt_tags %}
+        {% recursetree all_game_comments %}
+            <div class="comments-comments">
+                {% include 'comment/_comments.html' with comment=node %}
+
+                {% if not node.is_leaf_node %}
+                <div class="pl-3">
+                    {{ children }}
+                </div>
+            </div>
+            {% endif %}
+        {% endrecursetree %}
+    </div>
+
+    <div class="py-4">
+        <nav aria-label="Page navigation example">
+          {% if comments.has_other_pages %}
+          <ul class="pagination">
+            {% if comments.has_previous %}
+            <li class="page-item"><a class="page-link" href="?page={{ comments.previous_page_number }}">Previous</a>
+            </li>
+            {% else %}
+            <li class="page-item disabled"><a class="page-link" href="#">Previous</a></li>
+            {% endif %}
+            {% for num in comments.paginator.page_range %}
+            {% if comments.number == l %}
+            <li class="page-item active"><span class="page-link">{{ num }} <span class="sr-only">(current)</span></span>
+            </li>
+            {% else %}
+            <li><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+            {% endif %}
+            {% endfor %}
+            {% if comments.has_next %}
+            <li class="page-item"><a class="page-link" href="?page={{ comments.next_page_number }}">Next</a></li>
+            {% else %}
+            <li class="page-item disabled"><a class="page-link" href="#">Next</a></li>
+            {% endif %}
+          </ul>
+          {% endif %}
+        </nav>
+    </div>
+
+
+</div>
+
     <script>
         $(document).on('click', '#add-to-cart', function (e) {
             e.preventDefault();
@@ -52,13 +109,119 @@
             });
         })
 
+
+            // send INITIAL NO PARENT comment
+        $(document).on('click', '#comment-send', function (e) {
+            e.preventDefault();
+            $.ajax({
+                type: 'POST',
+                url: '{% url "comments:comment-post" %}',
+                data: {
+                    content: $('#comment-form-data').val(),
+                    game: '{{ object.pk }}',
+                    csrfmiddlewaretoken: "{{ csrf_token }}",
+                    action: 'post',
+                },
+                success: function (json) {
+                    if (json.message) {
+                        mbar(json.message, 'info');
+                        $("html, body").animate({ scrollTop: 0 }, "medium");
+                    } else {
+                            // insert new comment
+                        $(`<div class="container reply-section mb-1" data-index="" style="border: 1px solid wheat; border-radius: 15px">
+                                <div class="comment-wrap p-3">
+                                    <div class="comment-info">
+                                        <img class="float-left profile-img rounded-circle mr-3" src="{{ request.user.profile.image.url }}">
+                                        {% if request.user.is_anonymous %}
+                                            <b>{{ request.user }}</b>
+                                        {% else %}
+                                            <b>{{ request.user.username }}</b>
+                                        {% endif %}
+                                        <span class="ml-3"> posted just now</span>
+                                    </div>
+
+                                    <div class="comment-data pt-3">
+                                        <p class="">` + json.content + `</p>
+                                    </div>
+                                </div>
+                            </div>`).prependTo('#comments')
+                        }
+                },
+                error: function (xhr, errmsg, err) {
+                }
+            });
+        })
+    // show form
+    // send REPLY comment
+            $(document).on('click', '.comment-reply-send', function (e) {
+                e.preventDefault();
+                let parentId = $(this).data('index');
+                console.log(parentId)
+                let content = $('.comment-form-data[data-index="' + parentId + '"]').val()
+                $.ajax({
+                    type: 'POST',
+                    url: '{% url "comments:comment-post" %}',
+                    data: {
+                        content: content,
+                        parent: parentId,
+                        game: '{{ object.pk }}',
+                        csrfmiddlewaretoken: "{{ csrf_token }}",
+                        action: 'post',
+                    },
+                    success: function (json) {
+                        if (json.message) {
+                            mbar(json.message, 'info');
+                            $("html, body").animate({ scrollTop: 0 }, "medium");
+                        } else {
+                            // insert new comment
+                            $(`<div class="container reply-section mb-1 pl-3" data-index="{{ comment.id }}" style="border: 1px solid wheat; border-radius: 15px">
+                                <div class="comment-wrap p-3">
+                                    <div class="comment-info">
+                                        <img class="float-left profile-img rounded-circle mr-3" src="{{ request.user.profile.image.url }}">
+                                        {% if request.user.is_authorized %}
+                                            <b>` + json.user + `</b>
+                                        {% else %}
+                                            <b>{{ request.user.username }}</b>
+                                        {% endif %}
+                                        <span class="ml-3"> posted just now</span>
+                                    </div>
+
+                                    <div class="comment-data pt-3">
+                                        <p class="">TEST COMENT CONTENT</p>
+                                    </div>
+                                </div>
+                            </div>`).insertAfter('.reply-section[data-index="'+ parentId +'"]')
+                        }
+                        console.log(json)
+                    },
+                    error: function (xhr, errmsg, err) {
+                    }
+                });
+            })
+// delete comment
+            $(document).on('click', '#delete-comment', function (e) {
+            e.preventDefault();
+            $.ajax({
+                type: 'POST',
+                url: '{% url "comments:comment-delete" %}',
+                data: {
+                    id: $(this).data('index'),
+                    csrfmiddlewaretoken: "{{ csrf_token }}",
+                    action: 'post',
+                },
+                success: function (json) {
+                    if (json.message) {
+                        mbar(json.message, 'info');
+                        {#$("html, body").animate({ scrollTop: 0 }, "medium");#}
+                    }
+                },
+                error: function (xhr, errmsg, err) {
+                }
+            });
+        })
+
+
     </script>
-
-{# Comment section #}
-{% include 'comment/_comments.html' %}
-
-
 
 {% endblock %}
 
-</div>

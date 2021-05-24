@@ -39,12 +39,14 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.sites',
 
+
     'games.apps.GamesConfig',
     'users.apps.UsersConfig',
     'comment.apps.CommentConfig',
     'order.apps.OrderConfig',
 
     'crispy_forms',
+    'mptt',
     'allauth',
     'allauth.account',
 ]
