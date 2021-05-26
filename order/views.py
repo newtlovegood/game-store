@@ -2,8 +2,6 @@ from django.http import JsonResponse
 from django.views.generic import ListView, DetailView, FormView
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.shortcuts import get_list_or_404, get_object_or_404, redirect, render
-from django.contrib.auth.decorators import login_required
-from django.utils import timezone
 from django.contrib import messages
 
 from order.models import Order, OrderItem
@@ -59,11 +57,18 @@ class OrderDetailView(UserPassesTestMixin, DetailView):
         return self.request.user.groups.filter(name='managers').exists()
 
 
-
 class OrderCheckoutView(FormView):
     template_name = 'order/order_checkout.html'
     form_class = OrderCheckoutForm
     success_url = '/thanks/'
+
+    def get(self, request, *args, **kwargs):
+        o = Order.objects.filter(ordered=False)[0]
+        o.customer = request.user
+        o.save()
+
+        context = {'form': super().get_form(self.form_class)}
+        return render(request, self.template_name, context)
 
     def get_initial(self):
         initial = super(OrderCheckoutView, self).get_initial()

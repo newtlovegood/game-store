@@ -20,41 +20,10 @@ class ProfileTests(TestCase):
         self.assertEqual(profile.user.email, 'test@email.com')
         self.assertEqual(profile.user.profile, profile)
 
+    def test_profile_update_status_code(self):
+        self.client.post(reverse('account_login'), {'login': 'test@email.com', 'password': 'secret'}, follow=False)
+        response = self.client.get(reverse('profile'))
+        self.assertEqual(response.status_code, 200)
 
-class UsersViewTests(TestCase):
 
-    def setUp(self):
-        self.game = mock.Mock(spec=Game)
-        self.order = Order.objects.create()
-        order_item = mock.create_autospec(OrderItem)
-        self.order_item = order_item()
-        # self.order_item.id = mock.Mock()
-        User = get_user_model()
-        self.credentials = {
-            'username': 'testuser',
-            'email': 'test@email.com',
-            'password': 'secret'}
-        self.user = User.objects.create_user(**self.credentials)
 
-    def test_profile_update_view(self):
-        pass
-
-    def test_custom_login(self):
-        # create anon order which is unordered
-        self.order.ordered = False
-        # login
-        response = self.client.post(reverse('account_login'), {'login': 'test@email.com', 'password': 'secret'}, follow=False)
-        # print('RESPONSE BELOW')
-        # check if user is authenticated
-        self.assertTrue(response.context['user'].is_authenticated)
-        # print(response.context['user'])
-        # check if order is assigned to user
-        Order.objects.create()
-        print(Order.objects.filter(ordered=False)[0].customer)
-        print(response.context['user'])
-        order_processed = Order.objects.filter(ordered=False)[0]
-        # print(order_processed)
-        self.assertEqual(order_processed.customer, self.user)
-
-    def test_custom_logout(self):
-        pass

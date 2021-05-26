@@ -4,7 +4,6 @@ from django.views.generic import View
 from allauth.account.views import LogoutView, LoginView
 
 from .forms import ProfileUpdateForm, CustomUserChangeForm
-from order.models import Order
 
 
 class ProfileUpdate(LoginRequiredMixin, View):
@@ -39,18 +38,8 @@ class CustomLogoutView(LogoutView):
 
 
 class CustomLoginView(LoginView):
-    
+
     def form_valid(self, form):
-
-        try:
-            o = Order.objects.get(ordered=False)
-            print(self.request.user)
-            print('above')
-            o.customer = self.request.user
-            o.save()
-
-        except Order.DoesNotExist:
-            pass
-
         return super().form_valid(form)
+
 
