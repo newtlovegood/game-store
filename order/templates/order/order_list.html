@@ -1,8 +1,17 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    {% for order in order_list %}
-        <p><a href="{% url 'order:order-detail' order.pk %}">{{ order }}</a></p>
-    {% endfor %}
+    <div class="detail-container p-3">
+        {% for order in order_list %}
+            <div>
+                <a class="" href="{% url 'order:order-detail' order.pk %}">{{ order.customer }}
+                <span class="ml-3">{{ order.date }}</span>
+                <span class="float-right">{{ order.total }}$</span>
+                </a>
+
+            </div>
+        {% endfor %}
+    </div>
+
 
 {% endblock %}

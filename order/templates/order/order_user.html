@@ -2,8 +2,15 @@
 
 {% block content %}
 
-    {% for order in user_filtered %}
-        <p><a href="{% url 'order:order-detail' order.pk %}">{{ order }}</a></p>
-    {% endfor %}
+    <div class="detail-container p-3">
+
+        {% if no_orders %}
+            <h2>No orders yet!</h2>
+        {% else %}
+            {% for order in user_filtered %}
+                <p><a href="{% url 'order:order-detail' order.pk %}">{{ order }}</a></p>
+            {% endfor %}
+        {% endif %}
+    </div>
 
 {% endblock %}

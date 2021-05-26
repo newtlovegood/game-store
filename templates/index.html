@@ -53,6 +53,13 @@
                                         <p class="price">${{ game.price }}</p>
                                             {% if game.id|slugify in request.session.cart %}
                                                 <a id="buy-button" data-index="{{ game.id }}" class="btn btn-success float-right" href="{% url 'order:order-current' %}"><ion-icon name="cart-outline"></ion-icon></a>
+
+                                                {% if game.quantity_available < 1 %}
+                                                    <p class="text-sm-center">Out of Stock</p>
+                                                {% else %}
+                                                    <p class="text-sm-center">Available</p>
+                                                {% endif %}
+
                                             {% else %}
 
                                                 {% if game.quantity_available < 1 %}

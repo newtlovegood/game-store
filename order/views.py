@@ -1,5 +1,6 @@
 from django.http import JsonResponse
 from django.views.generic import ListView, DetailView, FormView
+from django.contrib.auth.mixins import UserPassesTestMixin
 from django.shortcuts import get_list_or_404, get_object_or_404, redirect, render
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
@@ -17,7 +18,10 @@ class UserOrderView(ListView):
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['user_filtered'] = get_list_or_404(Order.objects.filter(customer_id=self.kwargs.get('id')))
+        orders_qs = Order.objects.filter(customer_id=self.kwargs.get('id'))
+        context['user_filtered'] = orders_qs
+        if not orders_qs:
+            context['no_orders'] = True
         return context
 
 
@@ -36,17 +40,24 @@ class UserCurrentOrderView(ListView):
             return redirect('/')
 
 
-class AllOrdersView(ListView):
+class AllOrdersView(UserPassesTestMixin, ListView):
     model = Order
 
+    def test_func(self):
+        return self.request.user.groups.filter(name='managers').exists()
 
-class OrderDetailView(DetailView):
+
+class OrderDetailView(UserPassesTestMixin, DetailView):
     model = Order
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['orders_filtered'] = OrderItem.objects.all()
         return context
+
+    def test_func(self):
+        return self.request.user.groups.filter(name='managers').exists()
+
 
 
 class OrderCheckoutView(FormView):
@@ -97,14 +108,19 @@ def add_to_basket(request):
         # CHECKS IF ANY OPEN ORDER
         order_qs = Order.objects.filter(ordered=False)
         if order_qs.exists():
+            #  CHECK IF GAME ALREADY ADDED
+
             order = order_qs[0]
+
             add_new_item_to_order(request,
                                   game_qty,
                                   game,
                                   order)
+
         else:
             # create new order
             order = Order.objects.create()
+
             add_new_item_to_order(request,
                                   game_qty,
                                   game,
@@ -117,8 +133,10 @@ def add_to_basket(request):
         cart_length = cart.__len__()
         # message
         if game_qty != actual_qty:
-            return JsonResponse({'message': 'Item quantity was adjusted!', 'total': order.total, 'qty': cart_length})
-        return JsonResponse({'total': order.total, 'qty': cart_length})
+            return JsonResponse({'message': 'Item quantity was adjusted!', 'total': order.total, 'qty': cart_length, 'instock': False})
+        elif game.quantity_available == 0:
+            return JsonResponse({'message': 'Item was added', 'total': order.total, 'qty': cart_length, 'instock': False})
+        return JsonResponse({'message': 'Item was added', 'total': order.total, 'qty': cart_length})
 
 
 def remove_from_basket(request):
@@ -131,7 +149,13 @@ def remove_from_basket(request):
             order = order_qs[0]
             # CHECK IF THE SAME GAME IS ALREADY THERE
             if order.items.filter(item__pk=game.pk).exists():
-                order_item = order.items.get(item__pk=game.pk)
+                try:
+                    order_item = order.items.get(item__pk=game.pk)
+                except OrderItem.MultipleObjectsReturned:
+                    order.delete()
+                    cart.delete(game)
+                    cart.clear()
+                    return JsonResponse({'message': 'Something went wrong'})
                 # delete from order
                 order.items.get(item__pk=game.pk).delete()
                 # update total price
@@ -175,20 +199,10 @@ def increment_to_basket(request):
             return JsonResponse({'message': 'Order/Item not found'})
 
         # check if QTY-AVAILABLE enough
-        if not check_if_qty_is_enough(request,
-                                      1,
-                                      game,
-                                      order_item,
-                                      order):
+        if not game.is_qty_enough(1):
             return JsonResponse({'message': 'We can\'t get you more than this ! :('})
 
-        # game_avlbl reduce
-        game.quantity_available -= 1
-        game.save()
-        # order/item increase
-        order_item.quantity += 1
-        order_item.save()
-        # calc total in order
+        order_item.adding_game_to_cart()
         order.calculate_total()
         # add to cart
         cart.add(game, 1)
@@ -220,9 +234,11 @@ def reduce_from_basket(request):
         # game.available +1
         game.quantity_available += 1
         game.save()
+        print(game.quantity_available)
         # reduce from order/item
         order_item.quantity -= 1
         order_item.save()
+        print(order_item.quantity)
         # calc total in order
         order.calculate_total()
         # reduce from cart
@@ -239,34 +255,28 @@ def reduce_from_basket(request):
 ######## helper functions ######
 
 
-def check_if_qty_is_enough(request, requested_qty, game, order_item, order):
-    if game.quantity_available <= 0:
-        return False
-    elif game.quantity_available > 0:
+def add_new_item_to_order(request, requested_qty, game, order):
+    if not game.is_qty_enough(requested_qty):
         if requested_qty > game.quantity_available:
             requested_qty = game.quantity_available
-        order_item.adding_game_to_cart(requested_qty)
-        order.calculate_total()
-        return True
+    order_item = create_order_item(request, game, requested_qty)
+    order.items.add(order_item)
+    order_item.adding_game_to_cart(requested_qty)
+    order.calculate_total()
 
 
-def add_new_item_to_order(request, requested_qty, game, order):
+def create_order_item(request, game, requested_qty):
     if request.user.is_authenticated:
-        order_item = OrderItem.objects.create(
+        return OrderItem.objects.create(
             item=game,
             user=request.user,
             quantity=requested_qty,
             ordered=False
         )
     else:
-        order_item = OrderItem.objects.create(
+        return OrderItem.objects.create(
             item=game,
             quantity=requested_qty,
             ordered=False
         )
-    order.items.add(order_item)
-    check_if_qty_is_enough(request,
-                           requested_qty,
-                           game,
-                           order_item,
-                           order)
+

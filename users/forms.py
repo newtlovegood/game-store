@@ -5,16 +5,10 @@ from django import forms
 from .models import Profile
 
 
-# class UserRegisterForm(UserCreationForm):
-#     class Meta:
-#         model = User
-#         fields = ('email', 'password1', 'password2')
-#
-
 class CustomUserChangeForm(UserChangeForm):
     class Meta:
         model = User
-        fields = ('email', 'username',)
+        fields = ('email', 'username')
 
 
 class ProfileUpdateForm(forms.ModelForm):

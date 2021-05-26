@@ -5,15 +5,18 @@
 {% block content %}
 
     <div class="detail-container p-3">
-    <p>{{ user.username }}</p>
-    <img class="text-center" src={{ user.profile.image.url }} >
+        <div class="mb-3">
+            {{ user.username }}
+            <a class="btn btn-info float-right" href="{% url 'order:order-user' user.id %}">My orders</a>
+        </div>
+        <img class="text-center" style="max-height: 500px; max-width: 500px; width: auto" src={{ user.profile.image.url }}>
 
-    <form method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        {{ form_user|crispy }}
-        {{ form_profile|crispy }}
-        <input class="btn btn-success" type="submit" value="Update">
-    </form>
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form_user|crispy }}
+            {{ form_profile|crispy }}
+            <input class="btn btn-success" type="submit" value="Update">
+        </form>
     </div>
 
 {% endblock %}

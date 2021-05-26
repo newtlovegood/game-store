@@ -61,12 +61,11 @@ class Game(models.Model):
     def get_template_readable_name(self):
         return self.name.replace(' ', '_')
 
+    def is_qty_enough(self, requested_qty):
+        if self.quantity_available < requested_qty:
+            return False
+        return True
 
-    # def minus_quantity(self):
-    #     self.quantity_available -= 1
-    #
-    # def plus_quantity(self):
-    #     self.quantity_available += 1
 
     def __str__(self):
         return self.name

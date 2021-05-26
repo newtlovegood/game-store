@@ -40,8 +40,11 @@
                             action: 'post',
                         },
                         success: function (json) {
-                            if (typeof json.deleted != "undefined") {
+                            if ((typeof json.deleted != "undefined") || (json.message.includes('wrong'))) {
                                 window.location.href = {% url 'games:home' %} ;
+                                if (json.message.includes('wrong')) {
+                                    mbar(json.message, 'info');
+                                }
                             } else if (json.message){
                                 mbar(json.message, 'info');
                             } else {
@@ -69,6 +72,7 @@
                             action: 'post',
                         },
                         success: function (json) {
+                            console.log(json);
                             if (json.message) {
                                 mbar(json.message, 'info')
                             } else {

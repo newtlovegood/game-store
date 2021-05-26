@@ -19,7 +19,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 from . import views
-from users.views import profile_update, ProfileUpdate, CustomLogoutView, CustomLoginView
+from users.views import ProfileUpdate, CustomLogoutView, CustomLoginView
 from games.views import HomePageView
 
 

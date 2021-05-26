@@ -12,21 +12,12 @@ class Order(models.Model):
     ordered = models.BooleanField(default=False)
     date = models.DateTimeField(auto_now_add=True)
 
-    # def increase_total(self, order_item):
-    #     self.total += order_item.price
-    #     self.save()
-    #
-    # def reduce_total(self, order_item):
-    #     self.total -= order_item.price
-    #     self.save()
-
     def calculate_total(self):
         total = 0
         for item in self.items.all():
             total += item.calculate_sub_total()
-        self.total = total
+        self.total = round(total, 2)
         self.save()
-
 
     def destroy_order(self):
         for item in self.items.all():
@@ -43,10 +34,20 @@ class OrderItem(models.Model):
     quantity = models.IntegerField(default=1)
 
     def adding_game_to_cart(self, add_qty=None):
+        """
+        INcreases QTY of order_item
+        Decreases QTY of game qty available
+        :param add_qty: qty to add
+        :return: None
+        """
         if add_qty:
             self.quantity = add_qty
             self.save()
-        self.item.quantity_available -= self.quantity
+            self.item.quantity_available -= self.quantity
+        else:
+            self.quantity += 1
+            self.save()
+            self.item.quantity_available -= 1
         self.item.save()
 
     def remove_game_from_cart(self, rem_qty=None):
