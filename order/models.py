@@ -1,6 +1,5 @@
 from django.db import models
 from django.conf import settings
-from django.db.models import Sum
 
 from games.models import Game
 
@@ -8,7 +7,7 @@ from games.models import Game
 class Order(models.Model):
     customer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True, null=True)
     total = models.FloatField(default=0)
-    items = models.ManyToManyField('OrderItem')
+    items = models.ManyToManyField('OrderItem', null=True)
     ordered = models.BooleanField(default=False)
     date = models.DateTimeField(auto_now_add=True)
 
@@ -19,9 +18,11 @@ class Order(models.Model):
         self.total = round(total, 2)
         self.save()
 
-    def destroy_order(self):
+    # not yet used
+    def reset_items_qty_available(self):
         for item in self.items.all():
             item.item.quantity_available += item.quantity
+            item.item.save()
 
     def __str__(self):
         return f"{self.customer}'s order - {'ordered' if self.ordered else 'NOT ordered'}"
@@ -59,8 +60,6 @@ class OrderItem(models.Model):
 
     def calculate_sub_total(self):
         return self.quantity * self.item.price
-
-
 
     def __str__(self):
         return f"{self.quantity} piece(s) of {self.item.name} - {'ordered' if self.ordered else 'NOT ordered'}"

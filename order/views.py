@@ -66,7 +66,6 @@ class OrderCheckoutView(FormView):
         o = Order.objects.filter(ordered=False)[0]
         o.customer = request.user
         o.save()
-
         context = {'form': super().get_form(self.form_class)}
         return render(request, self.template_name, context)
 
