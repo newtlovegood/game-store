@@ -4,23 +4,24 @@
 
 {#only displayed on FILTER pages#}
 {% block filter %}
-{#    <h3>{{ request.resolver_match.kwargs.slug.capitalize }}</h3>#}
 {% endblock %}
 
 
 
 {% block content %}
     <div class="main-frame">
-        <div class="pt-2">
+        <div class="pt-2" style="overflow: auto">
             {% if request.user|has_group:'managers' %}
                 <a class="btn btn-success" href="{% url 'games:add' %}" >Add game</a>
             {% endif %}
-
-            <button class="btn " onclick="$('#genre-select').toggle(); ">Genre</button>
-
-            <form class="search-box form-inline my-lg-0" action="{% url 'games:search' %}" method="get">
-                {{ form_search|crispy }}
-            </form>
+            {% if not search_bool %}
+                <button class="btn " onclick="$('#genre-select').toggle(); ">Genre</button>
+            {% endif %}
+            {% if not filter_bool %}
+                <form class="search-box form-inline my-lg-0" action="{% url 'games:search' %}" method="get">
+                    {{ form_search|crispy }}
+                </form>
+            {% endif %}
 
             <div class="" id="genre-select">
                 <form class="form-inline my-lg-0" action="{% url 'games:filter' %}" method="get">
@@ -37,7 +38,13 @@
 
                 <section id='gallery' class='pic-section'>
                     <ul class='pic-list top'>
+                        {% if not games %}
+                            <h4 class="pl-5 mt-3">0 found</h4>
+                        {% endif %}
                         {% for game in games %}
+                            {% if not games %}
+                                0 found
+                            {% endif %}
                             <li>
                             <div class="single-game-block">
                                 <div class='cake-pic'>
@@ -83,7 +90,7 @@
                                         </div>
 
                                         <div class="game-name">
-                                            <a href="{% url 'games:detail' game.id %}"><b>{{ game.name }}</b></a>
+                                            <a href="{{ game.get_absolute_url }}"><b>{{ game.name }}</b></a>
                                         </div>
                                     </div>
                                 </div>

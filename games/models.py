@@ -35,11 +35,11 @@ class Game(models.Model):
         default=uuid.uuid4,
         editable=False)
     name = models.CharField(max_length=300)
-    price = models.FloatField()
+    price = models.FloatField(default=0, blank=True)
     description = models.TextField(default='')
     genre = models.ManyToManyField(Genre, blank=True)
-    image = models.ImageField(upload_to='images/games', default='images/games/default.jpg')
-    quantity_available = models.IntegerField(validators=[MaxValueValidator(7858772994)], default=0)
+    image = models.ImageField(upload_to='images/games', default='images/games/default.jpg', null=True, blank=True)
+    quantity_available = models.IntegerField(validators=[MaxValueValidator(7858772994)], default=0, blank=True)
 
     class Meta:
         ordering = ['-quantity_available']
@@ -48,24 +48,10 @@ class Game(models.Model):
         # using this mostly for redirects in CBVs
         return reverse('games:detail', kwargs={'pk': self.pk})
 
-    def get_add_to_cart_url(self) :
-        return reverse("core:add-to-cart", kwargs={
-            "pk": self.pk
-        })
-
-    def get_remove_from_cart_url(self) :
-        return reverse("core:remove-from-cart", kwargs={
-            "pk": self.pk
-        })
-
-    def get_template_readable_name(self):
-        return self.name.replace(' ', '_')
-
     def is_qty_enough(self, requested_qty):
         if self.quantity_available < requested_qty:
             return False
         return True
-
 
     def __str__(self):
         return self.name

@@ -8,7 +8,7 @@
         {% for item in cur_order.items.all %}
             <div class="row mb-2 delete-entry" data-index="{{ item.item.id }}">
                 <div class="col-md-4 align-bottom">
-                    <a class="game-name" href="{% url 'games:detail' item.item.id %}">{{ item.item }}</a></div>
+                    <a class="game-name" href="{{ item.item.get_absolute_url }}">{{ item.item }}</a></div>
                 <div class="col-md-4">
                     <div class="float-right">
                         <button id="cart-minus" class="btn btn-outline-secondary cart-minus" data-index="{{ item.item.id }}">-</button>
