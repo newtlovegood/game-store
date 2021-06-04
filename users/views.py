@@ -28,18 +28,9 @@ class ProfileUpdate(LoginRequiredMixin, View):
             return redirect('profile')
 
         context = {'form_user': form_user, 'form_profile': form_profile}
-        render(request, self.template_name, context)
+        return render(request, self.template_name, context)
 
 
-class CustomLogoutView(LogoutView):
 
-    def get(self, *args, **kwargs):
-        return super().get(*args, **kwargs)
-
-
-class CustomLoginView(LoginView):
-
-    def form_valid(self, form):
-        return super().form_valid(form)
 
 

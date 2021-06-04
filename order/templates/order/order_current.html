@@ -40,13 +40,15 @@
                             action: 'post',
                         },
                         success: function (json) {
-                            if ((typeof json.deleted != "undefined") || (json.message.includes('wrong'))) {
+                            if (typeof json.deleted != "undefined") {
                                 window.location.href = {% url 'games:home' %} ;
+                            } else if (json.message) {
                                 if (json.message.includes('wrong')) {
+                                    window.location.href = {% url 'games:home' %} ;
                                     mbar(json.message, 'info');
-                                }
-                            } else if (json.message){
-                                mbar(json.message, 'info');
+                                } else {
+                                        mbar(json.message, 'info');
+                                    }
                             } else {
                                 $('.delete-entry[data-index="' + itemId +'"]').remove();
                                 document.getElementById('order-total').innerHTML = json.total;
@@ -119,8 +121,12 @@
                                     action: 'post',
                                 },
                                 success: function (json) {
-                                    document.getElementById('cart-qty').innerHTML = json.qty;
-                                    document.getElementById('order-total').innerHTML = json.total;
+                                    if (json.refresh) {
+                                        location.reload()
+                                    } else {
+                                        document.getElementById('cart-qty').innerHTML = json.qty;
+                                        document.getElementById('order-total').innerHTML = json.total;
+                                    }
                                 },
                                 error: function (xhr, errmsg, err) {
                                 }

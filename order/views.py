@@ -1,7 +1,7 @@
 from django.http import JsonResponse
 from django.views.generic import ListView, DetailView, FormView
 from django.contrib.auth.mixins import UserPassesTestMixin
-from django.shortcuts import get_list_or_404, get_object_or_404, redirect, render
+from django.shortcuts import get_object_or_404, redirect, render, reverse
 from django.contrib import messages
 
 from order.models import Order, OrderItem
@@ -48,11 +48,6 @@ class AllOrdersView(UserPassesTestMixin, ListView):
 class OrderDetailView(UserPassesTestMixin, DetailView):
     model = Order
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['orders_filtered'] = OrderItem.objects.all()
-        return context
-
     def test_func(self):
         return self.request.user.groups.filter(name='managers').exists()
 
@@ -61,13 +56,6 @@ class OrderCheckoutView(FormView):
     template_name = 'order/order_checkout.html'
     form_class = OrderCheckoutForm
     success_url = '/thanks/'
-
-    def get(self, request, *args, **kwargs):
-        o = Order.objects.filter(ordered=False)[0]
-        o.customer = request.user
-        o.save()
-        context = {'form': super().get_form(self.form_class)}
-        return render(request, self.template_name, context)
 
     def get_initial(self):
         initial = super(OrderCheckoutView, self).get_initial()
@@ -78,15 +66,14 @@ class OrderCheckoutView(FormView):
                         'email': self.request.user.email})
         return initial
 
-    def get_confirm_message(self, **kwargs):
-        context = super(OrderCheckoutView, self).get_context_data()
-        context['messages'] = messages.info(self.request, 'Order is confirmed by GameStore')
-        return context
-
     def form_valid(self, form):
         order = Order.objects.filter(ordered=False)[0]
+        if self.request.user.is_authenticated:
+            order.customer = self.request.user
+            order.save()
         order.ordered = True
         order.save()
+
         # set ordered for all items in order
         for item in order.items.all():
             item.ordered = True
@@ -94,12 +81,12 @@ class OrderCheckoutView(FormView):
         # clear basket
         cart = Cart(self.request)
         cart.clear()
-        self.get_confirm_message()
         return super().form_valid(form)
 
 
 def add_to_basket(request):
     cart = Cart(request)
+
     if request.POST.get('action') == 'post':
         # GETS game DATA FROM AJAX REQUEST
         game_id = request.POST.get('gameId')
@@ -112,10 +99,7 @@ def add_to_basket(request):
         # CHECKS IF ANY OPEN ORDER
         order_qs = Order.objects.filter(ordered=False)
         if order_qs.exists():
-            #  CHECK IF GAME ALREADY ADDED
-
             order = order_qs[0]
-
             add_new_item_to_order(request,
                                   game_qty,
                                   game,
@@ -129,7 +113,6 @@ def add_to_basket(request):
                                   game_qty,
                                   game,
                                   order)
-
         # ADDS GAME TO SESSION DICT
         actual_qty = order.items.get(item_id=game_id).quantity
         cart.add(game, actual_qty)
@@ -206,6 +189,7 @@ def increment_to_basket(request):
         if not game.is_qty_enough(1):
             return JsonResponse({'message': 'We can\'t get you more than this ! :('})
 
+
         order_item.adding_game_to_cart()
         order.calculate_total()
         # add to cart
@@ -235,14 +219,15 @@ def reduce_from_basket(request):
         except (Order.DoesNotExist, OrderItem.DoesNotExist):
             return JsonResponse({'message': 'Order/Item not found'})
 
+        if order_item.quantity == 1:
+            # prevention from JS/HTML hackers
+            return JsonResponse({'refresh': True})
         # game.available +1
         game.quantity_available += 1
         game.save()
-        print(game.quantity_available)
         # reduce from order/item
         order_item.quantity -= 1
         order_item.save()
-        print(order_item.quantity)
         # calc total in order
         order.calculate_total()
         # reduce from cart

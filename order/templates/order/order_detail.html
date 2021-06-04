@@ -1,13 +1,15 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <p>{{ object.customer }}</p>
-    <ul>
-    {% for item in object.items.all %}
-        <li>{{ item }}</li>
-    {% endfor %}
-    </ul>
-    <p>{{ object.date }}</p>
-    <p>{{ object.total }}</p>
-    <p>{{ object.ordered }}</p>
+    <div class="detail-container p-3">
+        <p>Ordered by {{ object.customer }}</p>
+        <ul>
+        {% for item in object.items.all %}
+            <li>{{ item.quantity }} piece(s) of {{ item.item.name }}</li>
+        {% endfor %}
+        </ul>
+        <p>Ordered on {{ object.date }}</p>
+        <p>${{ object.total }}</p>
+    </div>
+
 {% endblock %}
