@@ -1,14 +1,7 @@
-from .models import Comment
 from django import forms
 from mptt.forms import TreeNodeChoiceField
 
 from .models import MPTTComment
-
-
-class CommentForm(forms.ModelForm):
-    class Meta:
-        model = Comment
-        fields = ('content', 'parent', 'game')
 
 
 class MPTTCommentForm(forms.ModelForm):
@@ -20,6 +13,6 @@ class MPTTCommentForm(forms.ModelForm):
         self.fields['parent'].required = False
 
     class Meta:
-        model = Comment
+        model = MPTTComment
         fields = ('content', 'game', 'parent')
 

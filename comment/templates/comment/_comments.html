@@ -29,7 +29,7 @@
         <div id="com-{{ comment.id }}" class="reply-form detail-container p-3 mb-3">
             <form method="post" action="">
                 {% csrf_token %}
-                <textarea class="form-control comment-form-data" type="text" data-index="{{ comment.id }}" name="comment-text"></textarea>
+                <textarea class="form-control comment-form-data mb-3" type="text" data-index="{{ comment.id }}" name="comment-text"></textarea>
                 <input class="btn btn-danger" type="reset" name="cancel" value="Cancel" onclick="getElementById('com-{{ comment.id }}').style.display = 'none';">
                 <input class="btn btn-success comment-reply-send" type="submit" name="submit" data-index="{{ comment.id }}" value="Submit comment">
             </form>

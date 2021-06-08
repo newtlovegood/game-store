@@ -58,14 +58,11 @@
     <div id="comments" class="comments">
     {% load mptt_tags %}
         {% recursetree all_game_comments %}
-            <div class="comments-comments">
                 {% include 'comment/_comments.html' with comment=node %}
-
                 {% if not node.is_leaf_node %}
                 <div class="pl-3">
                     {{ children }}
                 </div>
-            </div>
             {% endif %}
         {% endrecursetree %}
     </div>
@@ -221,18 +218,18 @@
 // delete comment
             $(document).on('click', '#delete-comment', function (e) {
             e.preventDefault();
+            let commId = $(this).data('index')
             $.ajax({
                 type: 'POST',
                 url: '{% url "comments:comment-delete" %}',
                 data: {
-                    id: $(this).data('index'),
+                    id: commId,
                     csrfmiddlewaretoken: "{{ csrf_token }}",
                     action: 'post',
                 },
                 success: function (json) {
                     if (json.message) {
-                        mbar(json.message, 'info');
-                        {#$("html, body").animate({ scrollTop: 0 }, "medium");#}
+                        $('.reply-section[data-index="' + commId +'"]').html(json.message);
                     }
                 },
                 error: function (xhr, errmsg, err) {

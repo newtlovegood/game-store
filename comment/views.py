@@ -1,9 +1,8 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import redirect, get_object_or_404
 from django.http import JsonResponse
 
-from .forms import CommentForm, MPTTCommentForm
-from .models import Comment, MPTTComment
-from  games.models import Game
+from .models import MPTTComment
+from games.models import Game
 
 
 # Create your views here.
@@ -35,9 +34,10 @@ def comment_post(request):
         return JsonResponse({'content': comment_content})
 
 
+
 def delete_comment(request):
     if request.POST.get('action') == 'post':
         # get comment data
         comment_id = request.POST.get('id')
         get_object_or_404(MPTTComment, id=comment_id).delete()
-        return JsonResponse({'message': 'Comment deleted'})
+        return JsonResponse({'message': 'COMMENT DELETED!'})
