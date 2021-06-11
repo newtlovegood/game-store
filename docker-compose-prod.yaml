@@ -3,8 +3,6 @@ version: "3.9"
 services:
   db:
     image: postgres
-    volumes:
-      - ./data/db:/var/lib/postgresql/data
     environment:
       - POSTGRES_DB=postgres
       - POSTGRES_USER=postgres
@@ -15,14 +13,12 @@ services:
       sh -c "python manage.py migrate &&
              python manage.py init_admin &&
              python manage.py runserver 0.0.0.0:8000"
-    volumes:
-      - .:/game_store_epam
     environment:
       - ENVIRONMENT=development
-      - DEBUG=1
       - SUPERUSER_NAME=admin
       - SUPERUSER_PASS=password
       - SUPERUSER_EMAIL=admin@email.com
+      - DEBUG=0
     ports:
       - "8000:8000"
     depends_on:
