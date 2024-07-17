@@ -60,6 +60,7 @@ INSTALLED_APPS = [
     'order.apps.OrderConfig',
 
     'crispy_forms',
+    'crispy_bootstrap4',
     'mptt',
     'allauth',
     'allauth.account',
@@ -74,6 +75,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'allauth.account.middleware.AccountMiddleware'
 ]
 
 ROOT_URLCONF = 'game_store_epam.urls'
@@ -180,6 +182,7 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # UI forms
+CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap4"
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
 # USER MANAGEMENT
